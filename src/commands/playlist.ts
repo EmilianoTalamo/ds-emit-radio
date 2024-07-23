@@ -1,10 +1,7 @@
 import { joinVoice } from '@/handlers/channel.js'
 import { player, queue } from '@/main.js'
-import { getUrlInfo, getYtInfo } from '@/utils/youtube.js'
-import {
-	ChatInputCommandInteraction,
-	SlashCommandBuilder,
-} from 'discord.js'
+import { getUrlInfo, getYtInfo, getYtPlaylistIds } from '@/utils/youtube.js'
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 
 export default {
 	data: new SlashCommandBuilder()
@@ -17,30 +14,43 @@ export default {
 				.setRequired(true),
 		),
 	async execute(interaction: ChatInputCommandInteraction) {
+		// Join user voice channel
 		const joined = await joinVoice(interaction)
-
 		if (!joined)
 			return await interaction.reply('You must be in a voice channel to play.')
 
+		// Read URL sent by the user
 		const url = interaction.options.data[0].value as string
-
 		const urlInfo = getUrlInfo(url)
+		if (!url || !urlInfo.playlistId)
+			return await interaction.reply('Invalid URL')
 
-		if (!url || !urlInfo.playlistId) return await interaction.reply('Invalid URL')
+		// Get array of IDs from the playlist
+		const idsArray = await getYtPlaylistIds(urlInfo.playlistId)
+		if (!idsArray || !idsArray.length) {
+			return interaction.reply('This playlist seems not valid.')
+		}
 
-		return interaction.reply('Playlists are WIP')
+		// Reply to the user if the playlist seems ok
+		interaction.reply('🥝 Playlist added to the queue.')
 
-		// const ytinfo = await getYtInfo(urlInfo.videoId)
+		// We already replied to the user but we do the playlist
+		// processing afterwards since it can take some time.
+		for (const id of idsArray) {
+			const ytinfo = await getYtInfo(id)
+			if (ytinfo) {
+				queue.add({
+					id,
+					title: ytinfo.videoDetails.title,
+				})
+				// Start playlist reproduction after the first element
+				//  is added if the bot is idle.
+				if(queue.queue.length === 1 && player.status === 'idle') {
+					player.play(interaction.channelId)
+				}
+			}
+		}
 
-		// if (!ytinfo)
-		// 	return await interaction.reply(`Invalid YouTube ID: ${urlInfo.videoId}`)
-
-		// queue.add({ id: urlInfo.videoId, title: ytinfo.videoDetails.title })
-
-		// if (player.status === 'idle') player.play(interaction.channelId)
-
-		// return interaction.reply(
-		// 	`Song ${ytinfo.videoDetails.title} added to the queue.`,
-		// )
+		return
 	},
 }

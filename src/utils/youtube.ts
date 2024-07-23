@@ -1,5 +1,6 @@
 import queryString from 'query-string'
 import ytdl from '@distube/ytdl-core'
+import { google } from 'googleapis'
 import { URLPattern } from 'urlpattern-polyfill'
 
 type GetUrlInfoResponse = {
@@ -75,9 +76,55 @@ export const getYtInfo = async (
 	id: string,
 ): Promise<ytdl.videoInfo | false> => {
 	if (!ytdl.validateID(id)) return false
-	const info = await ytdl.getInfo(`http://www.youtube.com/watch?v=${id}`)
+
+	let info: ytdl.videoInfo | false = false
+	try {
+		info = await ytdl.getInfo(`http://www.youtube.com/watch?v=${id}`)
+	} catch (err) {
+		return false
+	}
 
 	return info
+}
+
+export const getYtPlaylistIds = async (id: string) => {
+	const youtube = google.youtube({
+		version: 'v3',
+		auth: process.env.GOOGLE_API_KEY, // Replace with your API key
+	})
+
+	let videoIds: string[] = []
+	let nextPageToken: string = ''
+	let page = 0
+
+	try {
+		do {
+			const response = await youtube.playlistItems.list({
+				part: ['id', 'contentDetails'],
+				playlistId: id,
+				maxResults: 50,
+				pageToken: nextPageToken,
+			})
+
+			if (!response || !response?.data?.items) return false
+
+			page++
+
+			response.data.items.forEach((item) => {
+				if (
+					item.contentDetails?.videoId &&
+					item.contentDetails?.videoPublishedAt
+				)
+					videoIds.push(item.contentDetails.videoId)
+			})
+
+			nextPageToken = response?.data?.nextPageToken || ''
+		} while (nextPageToken && page <= 4) // 4 pages max (200 vids) to prevent quota limit
+	} catch (error) {
+		console.error('Error fetching playlist video IDs:', error)
+	}
+
+	return videoIds
 }
 
 export const getAudioStream = (id: string) => {

@@ -1,0 +1,25 @@
+version: '3.1'
+name: "ds-emit-radio" # Remove if you're not using docker compose v3 or higher.
+
+services:
+  ds-emit-radio:
+    image: 'ds-bot:1.0'
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    working_dir: /app
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    container_name: ds-emit-radio
+    restart: 'unless-stopped'
+    volumes:
+      - ./:/app:rw
+    command:
+      - /bin/sh
+      - -c
+      - |
+        rm -rf node_modules
+        npm i --verbose --foreground-scripts --include=dev --arch=x64 --platform=linux
+        npm run start
