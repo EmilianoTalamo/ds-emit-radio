@@ -6,7 +6,7 @@
     "customScope": "Denote the SCOPE of this change:",
     "subject": "Write a short imperative description of the change:\n",
     "body": "Provide a longer description of the change (optional):\n",
-    "footer": "Provide the JIRA ISSUE ID(s) of this commit. E.g.: GENIT-123:\n",
+    "footer": "Provide the JIRA ISSUE ID(s) of this commit.:\n",
     "confirmCommit": "Are you sure you want to proceed with the commit above?"
   },
 	"types": [
@@ -24,6 +24,6 @@
 	"useEmoji": false,
   "emojiAlign": "center",
   "allowCustomIssuePrefix": false,
-  "skipQuestions": ["breaking", "footerPrefix"],
+  "skipQuestions": ["breaking", "footerPrefix", "footer"],
   "issuePrefixes": []
 }
