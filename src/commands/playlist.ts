@@ -37,20 +37,21 @@ export default {
 		// We already replied to the user but we do the playlist
 		// processing afterwards since it can take some time.
 		for (const id of idsArray) {
-			const ytinfo = await getYtInfo(id)
-			if (ytinfo) {
-				queue.add({
-					id,
-					title: ytinfo.videoDetails.title,
-				})
-				// Start playlist reproduction after the first element
-				//  is added if the bot is idle.
-				if(queue.queue.length === 1 && player.status === 'idle') {
-					player.play(interaction.channelId)
-				}
-			}
+			queue.add({
+				id,
+				title: null,
+			})
+		}
+
+		await queue.refreshInfo()
+
+		// Start playlist reproduction
+		// if the bot is idle.
+		if(player.status === 'idle') {
+			player.play(interaction.channelId)
 		}
 
 		return
-	},
+	}
 }
+

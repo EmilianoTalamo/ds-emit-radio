@@ -1,4 +1,4 @@
 export type QueueItem = {
 	id: string,
-	title: string
+	title: string | null
 }

@@ -7,7 +7,7 @@ export default {
 		.setName('queue')
 		.setDescription('Show the current queue'),
 	async execute(interaction: ChatInputCommandInteraction) {
-		const msg = queue.print()
+		const msg = await queue.print()
 
 		if(msg)
 			return await interaction.reply(msg)

@@ -119,7 +119,7 @@ export const getYtPlaylistIds = async (id: string) => {
 			})
 
 			nextPageToken = response?.data?.nextPageToken || ''
-		} while (nextPageToken && page <= 4) // 4 pages max (200 vids) to prevent quota limit
+		} while (nextPageToken && page <= 8) // 8 pages max (500 vids) to prevent quota limit
 	} catch (error) {
 		console.error('Error fetching playlist video IDs:', error)
 	}
@@ -131,5 +131,8 @@ export const getAudioStream = (id: string) => {
 	return ytdl(`http://www.youtube.com/watch?v=${id}`, {
 		filter: 'audioonly',
 		quality: 'highest',
+		dlChunkSize: 0,
+		highWaterMark: 1 << 62,
+		liveBuffer: 1 << 62
 	})
 }
