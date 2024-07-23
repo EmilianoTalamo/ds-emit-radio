@@ -1,0 +1,30 @@
+{
+	"compilerOptions": {
+		"target": "es2017",
+		"lib": ["es6", "esnext"],
+		"allowJs": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"forceConsistentCasingInFileNames": true,
+		"noEmit": true,
+		"esModuleInterop": true,
+		"module": "Nodenext",
+		"moduleResolution": "Nodenext",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"baseUrl": ".",
+		"jsx": "preserve",
+		"incremental": true,
+		"plugins": [
+			{
+				"name": "next"
+			}
+		],
+		"paths": {
+			"@/*": ["./src/*"],
+			"~/*": ["./*"]
+		}
+	},
+	"include": ["**/*.ts", "eslint.config.mjs", ".prettierrc.js", "env.d.ts"],
+	"exclude": ["node_modules"]
+}

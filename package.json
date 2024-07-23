@@ -1,0 +1,53 @@
+{
+  "name": "ds-emit-radio",
+  "version": "1.0.0",
+  "description": "Simple Discord music bot",
+  "main": "build/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --inspect ./src/main.ts",
+    "start": "tsx --no-warnings ./src/main.ts",
+    "lint": "lint-staged",
+    "prepare": "husky install && chmod ug+x .husky/*",
+    "commit": "cz"
+  },
+  "author": "Emiliano Talamo",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/lodash": "4.17.7",
+    "@types/node": "20.14.11",
+    "@typescript-eslint/eslint-plugin": "7.16.1",
+    "@typescript-eslint/parser": "7.16.1",
+    "eslint": "9.7.0",
+    "eslint-config-airbnb-base": "15.0.0",
+    "eslint-config-airbnb-typescript": "18.0.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-etc": "2.0.3",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-prettier": "5.2.1",
+    "nodemon": "3.1.4",
+    "prettier": "3.3.3",
+    "ts-node": "10.9.2",
+    "tsx": "4.16.2",
+    "typescript": "5.4.5"
+  },
+  "optionalDependencies": {
+    "commitizen": "^4.3.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "cz-git": "^1.7.1",
+    "husky": "^8.0.3",
+    "lint-staged": "15.2.0"
+  },
+  "dependencies": {
+    "@discordjs/voice": "0.17.0",
+    "@distube/ytdl-core": "4.13.5",
+    "discord.js": "14.15.3",
+    "dotenv": "16.4.5",
+    "ffmpeg-static": "5.2.0",
+    "libsodium-wrappers": "0.7.14",
+    "lodash": "4.17.21",
+    "npm": "10.8.2",
+    "query-string": "9.1.0",
+    "urlpattern-polyfill": "10.0.0"
+  }
+}

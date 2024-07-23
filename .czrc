@@ -1,0 +1,29 @@
+{
+	"path": "node_modules/cz-git",
+	"messages": {
+    "type": "Select the type of change that you're committing:",
+    "scope": "Denote the SCOPE of this change:",
+    "customScope": "Denote the SCOPE of this change:",
+    "subject": "Write a short imperative description of the change:\n",
+    "body": "Provide a longer description of the change (optional):\n",
+    "footer": "Provide the JIRA ISSUE ID(s) of this commit. E.g.: GENIT-123:\n",
+    "confirmCommit": "Are you sure you want to proceed with the commit above?"
+  },
+	"types": [
+    { "value": "feat", "name": "feat:     A new feature", "emoji": ":sparkles:" },
+    { "value": "fix", "name": "fix:      A bug fix", "emoji": ":bug:" },
+    { "value": "docs", "name": "docs:     Documentation only changes", "emoji": ":memo:" },
+    { "value": "style", "name": "style:    Changes that do not affect the meaning of the code", "emoji": ":lipstick:" },
+    { "value": "refactor", "name": "refactor: A code change that neither fixes a bug nor adds a feature", "emoji": ":recycle:" },
+    { "value": "build", "name": "build:    Changes that affect the build system or external dependencies", "emoji": ":package:" },
+    { "value": "chore", "name": "chore:    Other changes that don't modify src or test files", "emoji": ":hammer:" },
+    { "value": "revert", "name": "revert:   Reverts a previous commit", "emoji": ":rewind:" }
+  ],
+	"scopes": ["command", "config"],
+  "maxSubjectLength": 140,
+	"useEmoji": false,
+  "emojiAlign": "center",
+  "allowCustomIssuePrefix": false,
+  "skipQuestions": ["breaking", "footerPrefix"],
+  "issuePrefixes": []
+}
