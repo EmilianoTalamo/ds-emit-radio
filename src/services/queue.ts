@@ -46,7 +46,7 @@ class Queue {
 	}
 
 	async refreshInfo() {
-		// Get the info of the first 10 items on the queue
+		// Get the info of the first 5 items on the queue
 		// that don't have a title
 		for(let i = 0; i <= 5; i++) {
 			const item = this.queue[i]

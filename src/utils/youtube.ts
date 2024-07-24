@@ -130,9 +130,9 @@ export const getYtPlaylistIds = async (id: string) => {
 export const getAudioStream = (id: string) => {
 	return ytdl(`http://www.youtube.com/watch?v=${id}`, {
 		filter: 'audioonly',
-		quality: 'highest',
-		dlChunkSize: 0,
-		highWaterMark: 1 << 62,
-		liveBuffer: 1 << 62
+		quality: 'highestaudio',
+		dlChunkSize: 1024 * 1024,
+		highWaterMark: 1<<25,
+		liveBuffer: 1 << 62,
 	})
 }

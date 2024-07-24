@@ -19,7 +19,7 @@
     { "value": "chore", "name": "chore:    Other changes that don't modify src or test files", "emoji": ":hammer:" },
     { "value": "revert", "name": "revert:   Reverts a previous commit", "emoji": ":rewind:" }
   ],
-	"scopes": ["command", "config"],
+	"scopes": ["command", "config", "player", "queue"],
   "maxSubjectLength": 140,
 	"useEmoji": false,
   "emojiAlign": "center",
