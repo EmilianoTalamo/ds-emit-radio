@@ -26,12 +26,12 @@ export default {
 			return await interaction.reply('Invalid URL')
 
 		// Reply to the user if the playlist seems ok
-		interaction.editReply('🥝 Playlist added to the queue.')
+		interaction.reply('🥝 Playlist added to the queue.')
 
 		// Get array of IDs from the playlist
 		const idsArray = await getYtPlaylistIds(urlInfo.playlistId)
 		if (!idsArray || !idsArray.length) {
-			return interaction.editReply('This playlist seems not valid.')
+			return
 		}
 		
 		// add ids to the queue
