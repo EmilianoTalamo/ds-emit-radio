@@ -131,8 +131,8 @@ export const getAudioStream = (id: string) => {
 	return ytdl(`http://www.youtube.com/watch?v=${id}`, {
 		filter: 'audioonly',
 		quality: 'highestaudio',
-		dlChunkSize: 1024 * 1024,
-		highWaterMark: 1<<25,
+		dlChunkSize: 0,
+		highWaterMark: 1 << 62,
 		liveBuffer: 1 << 62,
 	})
 }

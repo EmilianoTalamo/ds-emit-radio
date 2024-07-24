@@ -1,4 +1,4 @@
-import { player, queue } from '@/main.js'
+import { queue } from '@/main.js'
 import {
 	ChatInputCommandInteraction,
 	SlashCommandBuilder,
@@ -12,7 +12,7 @@ export default {
 		const result = queue.shuffle()
 
 		if(result)
-			return interaction.reply('🤪')
+			return interaction.reply('🤪 Queue shuffled')
 		return interaction.reply('Is your queue long enough to shuffle it?')
 	},
 }

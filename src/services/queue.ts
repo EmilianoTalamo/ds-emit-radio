@@ -1,5 +1,7 @@
 import { QueueItem } from '@/interfaces/queue.interface.js'
+import { player } from '@/main.js'
 import { getYtInfo } from '@/utils/youtube.js'
+import { bold, EmbedBuilder } from 'discord.js'
 
 import _ from 'lodash'
 
@@ -15,15 +17,20 @@ class Queue {
 		const reducedQueue = this.queue.slice(0, 5)
 		let msg = ''
 		reducedQueue.forEach((item, index) => {
-			msg += `${index === 0 ? '▶️ ' : ''}${item.title || item.id}\n`
+			let title = `${item.title || item.id}\n`
+			msg += index ? title : bold(title)
 		})
 		if(this.queue.length > 5)
 			msg += `\n...and ${this.queue.length - 5} more songs.`
-		return msg
+		return generateQueueEmbed(msg)
 	}
 
 	add(song: QueueItem) {
 		this.queue.push(song)
+	}
+
+	addNext(song: QueueItem) {
+		this.queue.splice(1, 0, song)
 	}
 
 	clear() {
@@ -64,6 +71,13 @@ class Queue {
 			}
 		}
 	}
+}
+
+const generateQueueEmbed = (queue: string) => {
+	return new EmbedBuilder()
+		.setColor(player.color)
+		.setDescription(queue)
+		.setTitle('Current queue:')
 }
 
 export default Queue

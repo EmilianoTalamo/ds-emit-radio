@@ -1,4 +1,4 @@
-import { player, queue } from '@/main.js'
+import { connection, player, queue } from '@/main.js'
 import {
 	AudioPlayer,
 	AudioPlayerStatus,
@@ -7,7 +7,7 @@ import {
 } from '@discordjs/voice'
 import { ColorResolvable, EmbedBuilder } from 'discord.js'
 import { getAudioStream } from '../utils/youtube.js'
-import { leaveVoice, send, sendEmbed } from '@/handlers/channel.js'
+import { send, sendEmbed } from '@/handlers/channel.js'
 import { idlePresence, musicPresence } from '@/handlers/activity.js'
 import { secondsToMinutesAndSeconds } from '@/utils/format.js'
 
@@ -26,7 +26,6 @@ export class Player {
 
 		this.player.on(AudioPlayerStatus.Playing, () => {
 			if (queue.queue[0]) {
-				sendEmbed(this.textChannel, generateNowPlayingEmbed())
 				this.setStatus('playing')
 			}
 		})
@@ -77,6 +76,8 @@ export class Player {
 		}
 
 		this.setStatus('playing')
+
+		sendEmbed(this.textChannel, generateNowPlayingEmbed())
 	}
 
 	async stop(channel?: string) {
@@ -85,7 +86,7 @@ export class Player {
 		this.player.stop()
 		this.setStatus('idle')
 		this.errors = 0
-		leaveVoice()
+		connection.leaveVoice()
 	}
 
 	async skip(channel?: string) {

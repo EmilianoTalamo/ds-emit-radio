@@ -10,6 +10,7 @@ import { Client, Collection, Events, GatewayIntentBits } from 'discord.js'
 import Queue from './services/queue.js'
 import { Player } from './services/player.js'
 import { idlePresence } from './handlers/activity.js'
+import { Connection } from './handlers/channel.js'
 
 interface DsClient extends Client<true> {
 	commands?: Collection<any, any>
@@ -33,6 +34,7 @@ const client: DsClient = new Client({
 // Initiate classes
 export const queue = new Queue()
 export const player = new Player()
+export const connection = new Connection()
 
 player.color = process.env.BOT_COLOR as ColorResolvable || 'Default'
 
@@ -41,7 +43,7 @@ client.commands = new Collection()
 
 const main = async () => {
 
-	console.info('Loading commands...')
+	console.info('Loading command files...')
 	const loadCommandsResult = await loadCommands(client)
 	if(loadCommandsResult)
 		console.info('Successfully loaded commands.')

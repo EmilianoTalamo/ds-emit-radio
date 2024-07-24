@@ -1,4 +1,4 @@
-import client from "@/main.js"
+import client, { queue } from "@/main.js"
 import { ActivityType } from "discord.js"
 
 export const idlePresence = () => {
@@ -19,6 +19,8 @@ export const musicPresence = (title?: string) => {
 			{
 				name: title || '🎶',
 				type: ActivityType.Listening,
+				url: `https://youtube.com/watch?v=${queue.queue[0].id}`,
+
 			},
 		],
 		status: 'dnd',
