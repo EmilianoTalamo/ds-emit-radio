@@ -4,7 +4,7 @@ import {
 	loadCommands,
 	registerCommands,
 } from './utils/commands.js'
-import { REST } from 'discord.js'
+import { ColorResolvable, REST } from 'discord.js'
 
 import { Client, Collection, Events, GatewayIntentBits } from 'discord.js'
 import Queue from './services/queue.js'
@@ -33,6 +33,8 @@ const client: DsClient = new Client({
 // Initiate classes
 export const queue = new Queue()
 export const player = new Player()
+
+player.color = process.env.BOT_COLOR as ColorResolvable || 'Default'
 
 // Initiate client commands
 client.commands = new Collection()

@@ -52,8 +52,10 @@ class Queue {
 			const item = this.queue[i]
 			if(item && !item?.title) {
 				const ytinfo = await getYtInfo(item.id)
-				if(ytinfo)
+				if(ytinfo) {
 					item.title = ytinfo.videoDetails.title
+					item.ytdetails = ytinfo.videoDetails
+				}
 				else {
 					this.queue.splice(this.queue.indexOf(item), 1)
 					this.refreshInfo()

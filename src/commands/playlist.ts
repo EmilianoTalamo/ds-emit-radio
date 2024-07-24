@@ -1,6 +1,6 @@
 import { joinVoice } from '@/handlers/channel.js'
 import { player, queue } from '@/main.js'
-import { getUrlInfo, getYtInfo, getYtPlaylistIds } from '@/utils/youtube.js'
+import { getUrlInfo, getYtPlaylistIds } from '@/utils/youtube.js'
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 
 export default {
@@ -25,17 +25,20 @@ export default {
 		if (!url || !urlInfo.playlistId)
 			return await interaction.reply('Invalid URL')
 
+		// Apply the loading state so the interaction
+		// doesn't timeout
+		interaction.deferReply()
+
 		// Get array of IDs from the playlist
 		const idsArray = await getYtPlaylistIds(urlInfo.playlistId)
 		if (!idsArray || !idsArray.length) {
-			return interaction.reply('This playlist seems not valid.')
+			return interaction.editReply('This playlist seems not valid.')
 		}
 
 		// Reply to the user if the playlist seems ok
-		interaction.reply('🥝 Playlist added to the queue.')
-
-		// We already replied to the user but we do the playlist
-		// processing afterwards since it can take some time.
+		interaction.editReply('🥝 Playlist added to the queue.')
+		
+		// add ids to the queue
 		for (const id of idsArray) {
 			queue.add({
 				id,

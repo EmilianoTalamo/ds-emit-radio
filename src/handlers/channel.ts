@@ -1,5 +1,5 @@
 import client, { player } from '../main.js'
-import { CommandInteraction, GuildMember, TextChannel } from 'discord.js'
+import { CommandInteraction, EmbedBuilder, GuildMember, TextChannel } from 'discord.js'
 import { joinVoiceChannel } from '@discordjs/voice'
 
 let connection: any = null
@@ -35,4 +35,14 @@ export const send = (channelId: string, message: string) => {
 	if(channel.isVoiceBased()) return false
 		
 	channel.send(message)
+}
+
+export const sendEmbed = (channelId: string, embed: EmbedBuilder) => {
+	if(!channelId) return false
+
+	const channel = client.channels.cache.get(channelId) as TextChannel
+
+	if(channel.isVoiceBased()) return false
+	
+	channel.send({ embeds: [embed]})
 }

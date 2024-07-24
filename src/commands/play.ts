@@ -33,7 +33,7 @@ export default {
 			return await interaction.reply(`Invalid YouTube ID: ${urlInfo.videoId}`)
 
 		// Add to the queue
-		queue.add({ id: urlInfo.videoId, title: ytinfo.videoDetails.title })
+		queue.add({ id: urlInfo.videoId, title: ytinfo.videoDetails.title, ytdetails: ytinfo.videoDetails })
 
 		// Start reproduction if the bot is idle
 		if (player.status === 'idle') player.play(interaction.channelId)

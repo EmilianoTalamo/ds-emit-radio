@@ -119,7 +119,7 @@ export const getYtPlaylistIds = async (id: string) => {
 			})
 
 			nextPageToken = response?.data?.nextPageToken || ''
-		} while (nextPageToken && page <= 8) // 8 pages max (500 vids) to prevent quota limit
+		} while (nextPageToken && page <= 20) // 20 pages max (1000 vids) to prevent quota limit
 	} catch (error) {
 		console.error('Error fetching playlist video IDs:', error)
 	}
