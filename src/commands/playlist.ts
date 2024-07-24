@@ -25,18 +25,14 @@ export default {
 		if (!url || !urlInfo.playlistId)
 			return await interaction.reply('Invalid URL')
 
-		// Apply the loading state so the interaction
-		// doesn't timeout
-		interaction.deferReply()
+		// Reply to the user if the playlist seems ok
+		interaction.editReply('🥝 Playlist added to the queue.')
 
 		// Get array of IDs from the playlist
 		const idsArray = await getYtPlaylistIds(urlInfo.playlistId)
 		if (!idsArray || !idsArray.length) {
 			return interaction.editReply('This playlist seems not valid.')
 		}
-
-		// Reply to the user if the playlist seems ok
-		interaction.editReply('🥝 Playlist added to the queue.')
 		
 		// add ids to the queue
 		for (const id of idsArray) {
