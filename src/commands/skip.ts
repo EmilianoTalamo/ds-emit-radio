@@ -9,7 +9,7 @@ export default {
 		.setName('skip')
 		.setDescription('Skips the current song'),
 	async execute(interaction: ChatInputCommandInteraction) {
-		interaction.reply('Skipping this song...')
+		await interaction.reply('Skipping this song...')
 
 		player.skip(interaction.channelId) // TODO: Add validation that the person sending this command is in the same voice channel
 
