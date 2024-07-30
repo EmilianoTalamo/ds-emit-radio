@@ -52,6 +52,7 @@ export class Connection {
 	leaveVoice = () => {
 		if (this.connection) {
 			this.connection.destroy()
+			this.connection = null
 			return true
 		}
 		return false
