@@ -2,6 +2,7 @@ import queryString from 'query-string'
 import ytdl from '@distube/ytdl-core'
 import { google } from 'googleapis'
 import { URLPattern } from 'urlpattern-polyfill'
+import YTMusic from 'ytmusic-api'
 
 type GetUrlInfoResponse = {
 	videoId: string | null
@@ -135,4 +136,14 @@ export const getAudioStream = (id: string) => {
 		highWaterMark: 1 << 62,
 		liveBuffer: 1 << 62,
 	})
+}
+
+export const search = async (query: string) => {
+	const ytmusic = new YTMusic()
+	await ytmusic.initialize()
+
+	const results = await ytmusic.searchSongs(query)
+
+	return results[0]
+
 }

@@ -37,11 +37,16 @@ export class Player {
 			} else this.play()
 		})
 
-		this.player.on('error', (err) => {
+		this.player.on('error', async (err) => {
 			console.error('AudioPlayer error')
 			console.error(err)
+			await send(this.textChannel, `💥 ${err.message} on ${queue.queue[0].title}`)
+			if(err.message === 'Status code: 403') {
+				await send(this.textChannel, `☠️ Restarting process due to 403 error. Wait a minute before using another command.`)
+				this.stop()
+				process.exit()
+			}
 			this.errors++
-			send(this.textChannel, `💥 ${err.message} on ${queue.queue[0].title}`)
 			if(this.errors >= 5) {
 				send(this.textChannel, `❌ Aborting player to avoid spam due to multiple errors.`)
 				this.stop()

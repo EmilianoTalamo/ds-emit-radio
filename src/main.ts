@@ -11,6 +11,7 @@ import Queue from './services/queue.js'
 import { Player } from './services/player.js'
 import { idlePresence } from './handlers/activity.js'
 import { Connection } from './handlers/channel.js'
+import { SpotifyWebApi } from './utils/spotify.js'
 
 interface DsClient extends Client<true> {
 	commands?: Collection<any, any>
@@ -35,6 +36,7 @@ const client: DsClient = new Client({
 export const queue = new Queue()
 export const player = new Player()
 export const connection = new Connection()
+export const spotify = new SpotifyWebApi()
 
 player.color = process.env.BOT_COLOR as ColorResolvable || 'Default'
 

@@ -1,3 +1,5 @@
+import { Track } from "@spotify/web-api-ts-sdk";
+
 export const secondsToMinutesAndSeconds = (time: number | string): string => {
 	let parsedTime = 0
 	if(typeof time === 'string')
@@ -11,3 +13,7 @@ export const secondsToMinutesAndSeconds = (time: number | string): string => {
 }
 
 const zeroPad = (num: number, places: number) => String(num).padStart(places, '0')
+
+export const joinArtists = (artists: Track['artists']) => {
+	return artists.map(artist => artist.name).join(', ')
+}

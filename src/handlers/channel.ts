@@ -1,5 +1,12 @@
 import client, { player } from '../main.js'
-import { CommandInteraction, EmbedBuilder, GuildMember, TextChannel, VoiceBasedChannel } from 'discord.js'
+import {
+	ChatInputCommandInteraction,
+	CommandInteraction,
+	EmbedBuilder,
+	GuildMember,
+	TextChannel,
+	VoiceBasedChannel,
+} from 'discord.js'
 import { joinVoiceChannel, VoiceConnection } from '@discordjs/voice'
 
 export class Connection {
@@ -7,24 +14,12 @@ export class Connection {
 	constructor() {
 		this.connection = null
 
-		setInterval(() => {
-			const guilds = client.guilds.cache
-			guilds.forEach(guild => {
-				const botMember = guild.members.cache.get(client.user.id);
-				const botVoiceChannel = botMember?.voice.channel;
-		
-				if (botVoiceChannel) {
-						const membersInVoiceChannel = botVoiceChannel.members;
-		
-						if (membersInVoiceChannel.size < 2) {
-							// If the bot is left alone on a channel
-							// stop the player, clear the queue and leave
-							player.stop()
-						}
-				}
-		});
-		
-		}, 10*1000*60) // 10 minutes
+		setInterval(
+			() => {
+				if (isBotAlone()) player.stop()
+			},
+			10 * 1000 * 60,
+		) // 10 minutes
 	}
 
 	joinVoiceByChannelId = (channel: VoiceBasedChannel) => {
@@ -55,30 +50,79 @@ export class Connection {
 	}
 
 	leaveVoice = () => {
-		if(this.connection) {
-			this.connection.destroy();
+		if (this.connection) {
+			this.connection.destroy()
 			return true
 		}
 		return false
 	}
 }
 
-export const send = (channelId: string, message: string) => {
+export const send = async (channelId: string, message: string) => {
 	if (!channelId) return false
 
 	const channel = client.channels.cache.get(channelId) as TextChannel
 
-	if(channel.isVoiceBased()) return false
-		
-	channel.send(message)
+	if (channel.isVoiceBased()) return false
+
+	await channel.send(message)
+
+	return
 }
 
 export const sendEmbed = (channelId: string, embed: EmbedBuilder) => {
-	if(!channelId) return false
+	if (!channelId) return false
 
 	const channel = client.channels.cache.get(channelId) as TextChannel
 
-	if(channel.isVoiceBased()) return false
-	
-	channel.send({ embeds: [embed]})
+	if (channel.isVoiceBased()) return false
+
+	channel.send({ embeds: [embed] })
+}
+
+export const isBotAlone = () => {
+	let result = false
+	const guilds = client.guilds.cache
+	guilds.forEach((guild) => {
+		const botMember = guild.members.cache.get(client.user.id)
+		const botVoiceChannel = botMember?.voice.channel
+
+		if (botVoiceChannel) {
+			const membersInVoiceChannel = botVoiceChannel.members
+
+			if (membersInVoiceChannel.size < 2) {
+				result = true
+			}
+		}
+	})
+	return result
+}
+
+export const isBotConnectedToVoice = (): boolean => {
+	let result = false
+	const guilds = client.guilds.cache
+	guilds.forEach((guild) => {
+		const botMember = guild.members.cache.get(client.user.id)
+		const botVoiceChannel = botMember?.voice.channel
+		if (botVoiceChannel) result = true
+	})
+	return result
+}
+
+export const isUserWithBot = (
+	interaction: ChatInputCommandInteraction,
+): boolean => {
+	let result = false
+	const member = interaction.member as GuildMember
+	const userVoicechannel = member?.voice?.channel
+
+	if (!userVoicechannel) return result
+
+	const guilds = client.guilds.cache
+	guilds.forEach((guild) => {
+		const botMember = guild.members.cache.get(client.user.id)
+		const botVoiceChannel = botMember?.voice.channel
+		if (botVoiceChannel === userVoicechannel) result = true
+	})
+	return result
 }
