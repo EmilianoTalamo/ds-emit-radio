@@ -42,9 +42,9 @@ export class Player {
 			console.error(err)
 			await send(this.textChannel, `💥 ${err.message} on ${queue.queue[0].title}`)
 			if(err.message === 'Status code: 403') {
-				await send(this.textChannel, `☠️ Restarting process due to 403 error. Wait a minute before using another command.`)
 				this.stop()
-				process.exit()
+				await send(this.textChannel, `☠️ Restarting bot due to 403 error. Wait a minute before using another command.`)
+				return process.exit()
 			}
 			this.errors++
 			if(this.errors >= 5) {
