@@ -138,6 +138,7 @@ export const getAudioStream = (id: string) => {
 		dlChunkSize: 0,
 		highWaterMark: 1 << 62,
 		liveBuffer: 1 << 62,
+		agent
 	})
 }
 
