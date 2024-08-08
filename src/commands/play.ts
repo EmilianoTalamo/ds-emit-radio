@@ -13,7 +13,7 @@ import {
 export default {
 	data: new SlashCommandBuilder()
 		.setName('play')
-		.setDescription('Plays a YouTube video/Spotify song, or adds it to the queue.')
+		.setDescription('Plays a YouTube video/Spotify song, or adds it to the queue')
 		.addStringOption((option) =>
 			option
 				.setName('url')

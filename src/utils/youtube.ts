@@ -3,6 +3,7 @@ import ytdl from '@distube/ytdl-core'
 import { google } from 'googleapis'
 import { URLPattern } from 'urlpattern-polyfill'
 import YTMusic from 'ytmusic-api'
+import { agent } from '@/main.js'
 
 type GetUrlInfoResponse = {
 	videoId: string | null
@@ -80,8 +81,10 @@ export const getYtInfo = async (
 
 	let info: ytdl.videoInfo | false = false
 	try {
-		info = await ytdl.getInfo(`http://www.youtube.com/watch?v=${id}`)
+		info = await ytdl.getInfo(`http://www.youtube.com/watch?v=${id}`, { agent })
 	} catch (err) {
+		console.error('Error fetching YT info')
+		console.error(err)
 		return false
 	}
 

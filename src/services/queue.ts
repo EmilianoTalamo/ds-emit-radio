@@ -22,6 +22,9 @@ class Queue {
 		})
 		if (this.queue.length > 5)
 			msg += `\n...and ${this.queue.length - 5} more songs.`
+
+		if (player.repeat)
+			msg += `\n \n 🔁 The player is currently on repeat.`
 		return generateQueueEmbed(msg)
 	}
 

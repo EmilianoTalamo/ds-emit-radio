@@ -14,12 +14,14 @@ import { secondsToMinutesAndSeconds } from '@/utils/format.js'
 export class Player {
 	player: AudioPlayer
 	status: 'idle' | 'playing'
+	repeat: boolean
 	textChannel: string
 	errors: number
 	color: ColorResolvable
 	constructor() {
 		this.player = createAudioPlayer()
 		this.status = 'idle'
+		this.repeat = false
 		this.textChannel = ''
 		this.errors = 0
 		this.color = 'Default'
@@ -31,7 +33,7 @@ export class Player {
 		})
 
 		this.player.on(AudioPlayerStatus.Idle, () => {
-			queue.removeFirst()
+			if (!this.repeat) queue.removeFirst()
 			if (!queue.queue.length) {
 				this.setStatus('idle')
 			} else this.play()
@@ -40,15 +42,24 @@ export class Player {
 		this.player.on('error', async (err) => {
 			console.error('AudioPlayer error')
 			console.error(err)
-			await send(this.textChannel, `💥 ${err.message} on ${queue.queue[0].title}`)
-			if(err.message === 'Status code: 403') {
+			await send(
+				this.textChannel,
+				`💥 ${err.message} on ${queue.queue[0].title}`,
+			)
+			if (err.message === 'Status code: 403') {
 				this.stop()
-				await send(this.textChannel, `☠️ Restarting bot due to 403 error. Wait a minute before using another command.`)
+				await send(
+					this.textChannel,
+					`☠️ Restarting bot due to 403 error. Wait a minute before using another command.`,
+				)
 				return process.exit()
 			}
 			this.errors++
-			if(this.errors >= 5) {
-				send(this.textChannel, `❌ Aborting player to avoid spam due to multiple errors.`)
+			if (this.errors >= 5) {
+				send(
+					this.textChannel,
+					`❌ Aborting player to avoid spam due to multiple errors.`,
+				)
 				this.stop()
 			}
 		})
@@ -60,11 +71,13 @@ export class Player {
 
 		// If there's nothing to play, do nothing.
 		if (!queue.queue.length) {
-			this.stop()
+			this.stop(this.textChannel, false)
+			send(this.textChannel, 'Nothing else to play.')
 			return false
 		}
 
-		if(!queue.queue[0].title || !queue.queue[0].id) {
+		if (!queue.queue[0].title || !queue.queue[0].id) {
+			// Fauly song with no info, remove and play next
 			queue.removeFirst()
 			this.play()
 			return
@@ -85,13 +98,14 @@ export class Player {
 		sendEmbed(this.textChannel, generateNowPlayingEmbed())
 	}
 
-	async stop(channel?: string) {
+	async stop(channel?: string, leave: boolean = true) {
 		this.textChannel = channel || this.textChannel
 		queue.clear()
 		this.player.stop()
-		this.setStatus('idle')
 		this.errors = 0
-		connection.leaveVoice()
+		if(leave)
+			connection.leaveVoice()
+		this.setStatus('idle')
 	}
 
 	async skip(channel?: string) {
@@ -117,7 +131,9 @@ export class Player {
 const generateNowPlayingEmbed = () => {
 	return new EmbedBuilder()
 		.setColor(player.color)
-		.setDescription(`▶️  Now playing (${secondsToMinutesAndSeconds( queue.queue[0].ytdetails?.lengthSeconds || 0)})`)
+		.setDescription(
+			`${player.repeat ? '🔁' : '▶️'}  Now ${player.repeat ? 'repeating' : 'playing'} (${secondsToMinutesAndSeconds(queue.queue[0].ytdetails?.lengthSeconds || 0)})`,
+		)
 		.setTitle(queue.queue[0].title || 'song')
 		.setURL(`https://youtu.be/${queue.queue[0].id}`)
 		.setThumbnail(queue.queue[0].ytdetails?.thumbnails[0].url || null)

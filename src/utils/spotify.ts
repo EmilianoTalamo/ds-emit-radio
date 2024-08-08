@@ -1,5 +1,11 @@
 import { spotify } from '@/main.js'
-import { SpotifyApi } from '@spotify/web-api-ts-sdk'
+import {
+	Page,
+	PlaylistedTrack,
+	SimplifiedArtist,
+	SpotifyApi,
+	Track,
+} from '@spotify/web-api-ts-sdk'
 
 export class SpotifyWebApi {
 	clientId: string
@@ -27,20 +33,42 @@ const getPlaylistId = (url: string) => {
 			.trim()
 
 	// https://open.spotify.com/playlist/3X4hFq5OmXwZS7NlweCfAJ?si=0d690a7156db40ba
+
+	// https://open.spotify.com/album/7hMNG2Sl4qDB3gROXj2NSH?si=Rm-39J4pRoyYkU9K8k71ig
 	const spotifyPlaylistPattern = new URLPattern(
-		'https://open.spotify.com/playlist/:playlistId',
+		'https://open.spotify.com/:type/:playlistId',
 	)
 
-	return (
-		spotifyPlaylistPattern.exec(trimmedUrl)?.pathname.groups.playlistId || ''
-	)
+	return {
+		id:
+			spotifyPlaylistPattern.exec(trimmedUrl)?.pathname.groups.playlistId || '',
+		type:
+			spotifyPlaylistPattern.exec(trimmedUrl)?.pathname.groups.type ||
+			'invalid',
+	}
 }
 
-export const getTracksFromPlaylist = async (playlistUrl: string) => {
-	const playlistId = getPlaylistId(playlistUrl)
+export const getTracksFromPlaylist = async (
+	playlistUrl: string,
+): Promise<
+	{
+		artist: SimplifiedArtist[]
+		title: string
+	}[]
+> => {
+	const playlistInfo = getPlaylistId(playlistUrl)
 
-	if (!playlistId) return []
+	if (!playlistInfo.id || playlistInfo.type === 'invalid') return []
 
+	if (playlistInfo.type === 'playlist')
+		return await fetchPlaylist(playlistInfo.id)
+
+	if (playlistInfo.type === 'album') return await fetchAlbum(playlistInfo.id)
+
+	return []
+}
+
+const fetchPlaylist = async (playlistId: string) => {
 	const playlistItems = []
 	let next = true
 	let offset = 0
@@ -61,7 +89,36 @@ export const getTracksFromPlaylist = async (playlistUrl: string) => {
 		}
 	} while (next)
 
-	return playlistItems || []
+	return playlistItems.map((track) => ({
+		artist: track.track.artists,
+		title: track.track.name,
+	}))
+}
+
+const fetchAlbum = async (albumId: string) => {
+	const albumItems = []
+	let next = true
+	let offset = 0
+
+	do {
+		const items = await spotify.sdk.albums.tracks(
+			albumId,
+			undefined,
+			50,
+			offset,
+		)
+		albumItems.push(...items.items)
+		offset++
+
+		if (!items.next) {
+			next = false
+		}
+	} while (next)
+
+	return albumItems.map((track) => ({
+		artist: track.artists,
+		title: track.name,
+	}))
 }
 
 const getSongId = (url: string) => {

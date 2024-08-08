@@ -40,7 +40,7 @@ export default {
 		const url = interaction.options.data[0].value as string
 		const service = identifyService(url)
 
-		let result = false
+		let result = 0
 
 		if (service === 'spotify') result = await handleSpotify(interaction, url)
 		else result = await handleYoutube(interaction, url)
@@ -49,7 +49,9 @@ export default {
 
 		await queue.refreshInfo()
 
-		interaction.editReply('🥝 Playlist added to the queue.')
+		interaction.editReply(
+			`🥝 Playlist with ${result} songs added to the queue.`,
+		)
 
 		// Start playlist reproduction
 		// if the bot is idle.
@@ -64,11 +66,11 @@ export default {
 const handleYoutube = async (
 	interaction: ChatInputCommandInteraction,
 	url: string,
-) => {
+): Promise<number> => {
 	const urlInfo = getUrlInfo(url)
 	if (!url || !urlInfo.playlistId) {
 		await interaction.editReply('Invalid URL')
-		return false
+		return 0
 	}
 
 	// Reply to the user if the playlist seems ok
@@ -78,7 +80,7 @@ const handleYoutube = async (
 	const idsArray = await getYtPlaylistIds(urlInfo.playlistId)
 	if (!idsArray || !idsArray.length) {
 		await interaction.editReply(`The playlist doesn't seem valid.`)
-		return false
+		return 0
 	}
 
 	interaction.editReply('🫡 Your playlist will be added shortly...')
@@ -91,7 +93,7 @@ const handleYoutube = async (
 		})
 	}
 
-	return true
+	return idsArray.length
 }
 
 const handleSpotify = async (
@@ -104,7 +106,7 @@ const handleSpotify = async (
 
 	if (!tracks || !tracks.length) {
 		await interaction.editReply(`The playlist doesn't seem valid.`)
-		return false
+		return 0
 	}
 
 	interaction.editReply('🫡 Your playlist will be added shortly...')
@@ -112,9 +114,9 @@ const handleSpotify = async (
 	for (const track of tracks) {
 		queue.add({
 			id: null,
-			title: `${joinArtists(track.track.artists)} - ${track.track.name}`,
+			title: `${joinArtists(track.artist)} - ${track.title}`,
 		})
 	}
 
-	return true
+	return tracks.length
 }

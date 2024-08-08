@@ -4,6 +4,7 @@ node_modules/
 # secrets
 .env
 .env.local
+cookies.json
 
 # build
 build/

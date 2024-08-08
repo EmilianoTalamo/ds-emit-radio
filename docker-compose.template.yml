@@ -20,6 +20,5 @@ services:
       - /bin/sh
       - -c
       - |
-        rm -rf node_modules
-        npm i --verbose --foreground-scripts --include=dev --arch=x64 --platform=linux
+        npm i --verbose --foreground-scripts --include=dev --arch=x64 --platform=linux && npm update @distube/ytdl-core
         npm run start
