@@ -50,6 +50,12 @@ const agentOptions = {
 	pipelining: 5,
 	maxRedirections: 0,
 	localAddress: '0.0.0.0',
+	headers: {
+		referer: 'https://www.youtube.com/',
+		'User-Agent':
+			'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+		'Accept-Language': 'en-US,en;q=0.9',
+	},
 }
 export const agent = ytdl.createAgent(
 	cookies.length ? cookies : undefined,
