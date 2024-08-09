@@ -48,8 +48,6 @@ const cookies = await getCookies()
 console.info(`${cookies.length} cookies loaded.`)
 const agentOptions = {
 	pipelining: 5,
-	maxRedirections: 0,
-	localAddress: '0.0.0.0',
 	headers: {
 		referer: 'https://www.youtube.com/',
 		'User-Agent':
