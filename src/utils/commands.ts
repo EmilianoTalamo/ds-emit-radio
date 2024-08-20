@@ -5,6 +5,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'url'
 
 export const loadCommands = async (client: any) => {
+	console.info('\n📁 Loading command files...')
 	const __filename = fileURLToPath(import.meta.url)
 	const __dirname = path.dirname(__filename)
 
@@ -15,11 +16,10 @@ export const loadCommands = async (client: any) => {
 
 	const load = commandFiles.map(async (file) => {
 		try {
-			console.info(file)
 			const filePath = path.join(foldersPath, file)
 			let { default: command } = await import(filePath)
 			if ('data' in command && 'execute' in command) {
-				console.info(`Loaded command: ${command.data.name}`)
+				console.info(`✓ Loaded command: ${command.data.name}`)
 				client.commands.set(command.data.name, command)
 				Promise.resolve()
 			} else {
