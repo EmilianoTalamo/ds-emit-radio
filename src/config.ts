@@ -81,13 +81,9 @@ const setAgent = async () => {
 
 	if (process.env.PROXY_URL) {
 		console.info('🌎 Using proxy')
-		agent = ytdl.createProxyAgent(
-			{
-				uri: process.env.PROXY_URL,
-
-			},
-			cookies,
-		)
+		agent = ytdl.createProxyAgent({
+			uri: process.env.PROXY_URL,
+		}, cookies)
 	} else {
 		agent = ytdl.createAgent(
 			cookies.length ? cookies : undefined,
