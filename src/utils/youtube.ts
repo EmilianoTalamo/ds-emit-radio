@@ -79,13 +79,15 @@ export const getUrlInfo = (url: string): GetUrlInfoResponse => {
 	return res
 }
 
-export const getYtInfo = async (id: string): Promise<videoInfo | false> => {
+export const getYtInfo = async (id: string): Promise<YTDL_VideoInfo | false> => {
 	if (!ytdl.validateID(id)) return false
 
-	let info: videoInfo | false = false
+	let info: YTDL_VideoInfo | false = false
 	try {
-		info = await ytdl.getInfo(`http://www.youtube.com/watch?v=${id}`, {
+		info = await ybd.getInfo(`http://www.youtube.com/watch?v=${id}`, {
 			agent,
+			poToken: player.trustedTokens?.PO_TOKEN || undefined,
+			visitorData: player.trustedTokens?.VISITOR_DATA || undefined
 		})
 	} catch (err) {
 		console.error('Error fetching YT info')
@@ -147,6 +149,7 @@ export const getAudioStream = (id: string) => {
 		dlChunkSize: 0,
 		highWaterMark: 1 << 62,
 		liveBuffer: 1 << 62,
+		clients: ['web_creator', 'ios', 'android', 'tv_embedded'],
 		poToken: player.trustedTokens?.PO_TOKEN || undefined,
 		visitorData: player.trustedTokens?.VISITOR_DATA || undefined,
 	})
