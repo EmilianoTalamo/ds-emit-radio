@@ -6,7 +6,11 @@ import {
 	createAudioResource,
 } from '@discordjs/voice'
 import { ColorResolvable, EmbedBuilder } from 'discord.js'
-import { getAudioStream, getTrustedToken, TrustedToken } from '../utils/youtube.js'
+import {
+	getAudioStream,
+	getTrustedToken,
+	TrustedToken,
+} from '../utils/youtube.js'
 import { send, sendEmbed } from '@/handlers/channel.js'
 import { idlePresence, musicPresence } from '@/handlers/activity.js'
 import { secondsToMinutesAndSeconds } from '@/utils/format.js'
@@ -19,6 +23,7 @@ export class Player {
 	errors: number
 	color: ColorResolvable
 	trustedTokens: TrustedToken | null
+	getTrustedToken: () => Promise<boolean>
 	constructor() {
 		this.player = createAudioPlayer()
 		this.status = 'idle'
@@ -27,6 +32,12 @@ export class Player {
 		this.errors = 0
 		this.color = 'Default'
 		this.trustedTokens = null
+
+		this.getTrustedToken = async () => {
+			const token = await getTrustedToken()
+			this.trustedTokens = token
+			return !!token
+		}
 
 		this.player.on(AudioPlayerStatus.Playing, () => {
 			if (queue.queue[0]) {
@@ -87,13 +98,11 @@ export class Player {
 		}
 
 		// Get trusted tokens
-		if(!this.trustedTokens || !this.trustedTokens.PO_TOKEN)
-			this.trustedTokens = await getTrustedToken(queue.queue[0].id)
+		if (!this.trustedTokens || !this.trustedTokens.PO_TOKEN)
+			await this.getTrustedToken()
 
 		// Load the audio resource
 		const resource = createAudioResource(getAudioStream(queue.queue[0].id))
-
-		
 
 		// Check that the resource is valid
 		if (resource) this.player.play(resource)
@@ -112,8 +121,7 @@ export class Player {
 		queue.clear()
 		this.player.stop()
 		this.errors = 0
-		if(leave)
-			connection.leaveVoice()
+		if (leave) connection.leaveVoice()
 		this.setStatus('idle')
 	}
 

@@ -22,6 +22,8 @@ export const instances = () => {
 	const connection = new Connection()
 	const spotify = new SpotifyWebApi()
 
+	player.getTrustedToken()
+
 	return { queue, player, connection, spotify }
 }
 

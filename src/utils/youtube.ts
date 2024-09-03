@@ -1,5 +1,4 @@
 import queryString from 'query-string'
-import ytdl from '@distube/ytdl-core'
 import * as ybd from '@ybd-project/ytdl-core'
 import { google } from 'googleapis'
 import { URLPattern } from 'urlpattern-polyfill'
@@ -8,6 +7,7 @@ import { agent, player } from '@/main.js'
 // @ts-ignore
 import { generate } from 'youtube-po-token-generator'
 import { YTDL_DownloadOptions } from '@ybd-project/ytdl-core/package/types/options.js'
+import { YTDL_VideoInfo } from '@ybd-project/ytdl-core/package/types/youtube.js'
 
 type GetUrlInfoResponse = {
 	videoId: string | null
@@ -80,12 +80,16 @@ export const getUrlInfo = (url: string): GetUrlInfoResponse => {
 
 export const getYtInfo = async (
 	id: string,
-): Promise<ytdl.videoInfo | false> => {
-	if (!ytdl.validateID(id)) return false
+): Promise<YTDL_VideoInfo | false> => {
+	if (!ybd.validateID(id)) return false
 
-	let info: ytdl.videoInfo | false = false
+	let info: YTDL_VideoInfo | false = false
 	try {
-		info = await ytdl.getInfo(`http://www.youtube.com/watch?v=${id}`, { agent })
+		info = await ybd.getInfo(`http://www.youtube.com/watch?v=${id}`, {
+			agent,
+			poToken: player.trustedTokens?.PO_TOKEN || undefined,
+			visitorData: player.trustedTokens?.VISITOR_DATA || undefined,
+		})
 	} catch (err) {
 		console.error('Error fetching YT info')
 		console.error(err)
@@ -164,23 +168,22 @@ export interface TrustedToken {
 	VISITOR_DATA: string | null
 }
 
-export const getTrustedToken = async (id: string): Promise<TrustedToken> => {
+export const getTrustedToken = async (): Promise<TrustedToken> => {
 	let response: TrustedToken = {
 		PO_TOKEN: null,
-		VISITOR_DATA: null
+		VISITOR_DATA: null,
 	}
 	try {
-		const tokens: { visitorData: string, poToken: string} = await generate()
+		const tokens: { visitorData: string; poToken: string } = await generate()
 		response = {
 			PO_TOKEN: tokens?.poToken || null,
-			VISITOR_DATA: tokens?.visitorData || null
+			VISITOR_DATA: tokens?.visitorData || null,
 		}
-	}
-	catch (err) {
+	} catch (err) {
 		console.error(`Error generating trusted tokens`)
 		console.error(err)
 	}
-	return response 
+	return response
 }
 
 export const search = async (query: string) => {
