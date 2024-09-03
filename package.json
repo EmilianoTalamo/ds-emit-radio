@@ -32,7 +32,9 @@
     "cz-conventional-changelog": "^3.3.0",
     "cz-git": "^1.7.1",
     "husky": "^8.0.3",
-    "lint-staged": "15.2.0"
+    "lint-staged": "15.2.0",
+    "@discordjs/opus": "latest",
+    "ffmpeg-static": "5.2.0"
   },
   "dependencies": {
     "@discordjs/voice": "0.17.0",
@@ -41,7 +43,6 @@
     "@ybd-project/ytdl-core": "5.0.12",
     "discord.js": "14.15.3",
     "dotenv": "16.4.5",
-    "ffmpeg-static": "5.2.0",
     "googleapis": "140.0.1",
     "latest-version": "9.0.0",
     "libsodium-wrappers": "0.7.14",
