@@ -79,9 +79,7 @@ export const getUrlInfo = (url: string): GetUrlInfoResponse => {
 	return res
 }
 
-export const getYtInfo = async (
-	id: string,
-): Promise<videoInfo | false> => {
+export const getYtInfo = async (id: string): Promise<videoInfo | false> => {
 	if (!ytdl.validateID(id)) return false
 
 	let info: videoInfo | false = false
@@ -149,16 +147,9 @@ export const getAudioStream = (id: string) => {
 		dlChunkSize: 0,
 		highWaterMark: 1 << 62,
 		liveBuffer: 1 << 62,
+		agent,
 		poToken: player.trustedTokens?.PO_TOKEN || undefined,
 		visitorData: player.trustedTokens?.VISITOR_DATA || undefined,
-		requestOptions: {
-			headers: {
-				referer: 'https://www.youtube.com/',
-				'User-Agent':
-					'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-				'Accept-Language': 'en-US,en;q=0.9',
-			},
-		},
 	})
 }
 
