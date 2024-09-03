@@ -86,6 +86,7 @@ export const getYtInfo = async (id: string): Promise<YTDL_VideoInfo | false> => 
 	try {
 		info = await ybd.getInfo(`http://www.youtube.com/watch?v=${id}`, {
 			agent,
+			clients: ['web_creator', 'ios', 'android', 'tv_embedded'],
 			poToken: player.trustedTokens?.PO_TOKEN || undefined,
 			visitorData: player.trustedTokens?.VISITOR_DATA || undefined
 		})
