@@ -6,11 +6,12 @@ import {
 } from 'discord.js'
 import { player } from './main.js'
 import { getCookies, getLastVerion, getVersion } from './utils/services.js'
-import ytdl from '@distube/ytdl-core'
+import ytdl from '@ybd-project/ytdl-core'
 import Queue from './services/queue.js'
 import { Player } from './services/player.js'
 import { Connection } from './handlers/channel.js'
 import { SpotifyWebApi } from './utils/spotify.js'
+import { YTDL_Agent } from '@ybd-project/ytdl-core/package/types/agent.js'
 
 interface DsClient extends Client<true> {
 	commands?: Collection<any, any>
@@ -79,7 +80,7 @@ const setAgent = async () => {
 		},
 	}
 
-	let agent: ytdl.Agent | undefined = undefined
+	let agent: YTDL_Agent | undefined = undefined
 
 	if (process.env.PROXY_URL) {
 		console.info('🌎 Using proxy')

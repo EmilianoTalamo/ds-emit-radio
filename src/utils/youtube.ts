@@ -147,7 +147,6 @@ export const getAudioStream = (id: string) => {
 		dlChunkSize: 0,
 		highWaterMark: 1 << 62,
 		liveBuffer: 1 << 62,
-		agent,
 		poToken: player.trustedTokens?.PO_TOKEN || undefined,
 		visitorData: player.trustedTokens?.VISITOR_DATA || undefined,
 	})
