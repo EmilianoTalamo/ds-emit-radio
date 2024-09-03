@@ -44,6 +44,7 @@ export class Player {
 		this.player.on('error', async (err) => {
 			console.error('AudioPlayer error')
 			console.error(err)
+			this.trustedTokens = null
 			await send(
 				this.textChannel,
 				`💥 ${err.message} on ${queue.queue[0].title}`,
