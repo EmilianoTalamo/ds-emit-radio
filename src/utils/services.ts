@@ -1,5 +1,5 @@
 import ytdl, { Cookie } from '@distube/ytdl-core'
-import ytdlCore from '@distube/ytdl-core/package.json'
+import ytdlCore from '@ybd-project/ytdl-core/package.json'
 import latestVersion from 'latest-version'
 // import cookies from '~/cookies.json'
 
@@ -23,5 +23,5 @@ export const getCookies = async (): Promise<Cookie[]> => {
 export const getVersion = () => ytdlCore.version
 
 export const getLastVerion = async () => {
-	return await latestVersion('@distube/ytdl-core')
+	return await latestVersion('@ybd-project/ytdl-core')
 }

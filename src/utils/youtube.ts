@@ -1,9 +1,13 @@
 import queryString from 'query-string'
 import ytdl from '@distube/ytdl-core'
+import * as ybd from '@ybd-project/ytdl-core'
 import { google } from 'googleapis'
 import { URLPattern } from 'urlpattern-polyfill'
 import YTMusic from 'ytmusic-api'
-import { agent } from '@/main.js'
+import { agent, player } from '@/main.js'
+// @ts-ignore
+import { generate } from 'youtube-po-token-generator'
+import { YTDL_DownloadOptions } from '@ybd-project/ytdl-core/package/types/options.js'
 
 type GetUrlInfoResponse = {
 	videoId: string | null
@@ -132,13 +136,51 @@ export const getYtPlaylistIds = async (id: string) => {
 }
 
 export const getAudioStream = (id: string) => {
-	return ytdl(`http://youtube.com/watch?v=${id}`, {
+	const ybdYtdl = (ybd.default || ybd) as unknown as (
+		link: string,
+		options?: YTDL_DownloadOptions,
+	) => any
+	return ybdYtdl(`http://youtube.com/watch?v=${id}`, {
 		filter: 'audioonly',
 		quality: 'highestaudio',
 		dlChunkSize: 0,
 		highWaterMark: 1 << 62,
-		liveBuffer: 1 << 62
+		liveBuffer: 1 << 62,
+		poToken: player.trustedTokens?.PO_TOKEN || undefined,
+		visitorData: player.trustedTokens?.VISITOR_DATA || undefined,
+		requestOptions: {
+			headers: {
+				referer: 'https://www.youtube.com/',
+				'User-Agent':
+					'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+				'Accept-Language': 'en-US,en;q=0.9',
+			},
+		},
 	})
+}
+
+export interface TrustedToken {
+	PO_TOKEN: string | null
+	VISITOR_DATA: string | null
+}
+
+export const getTrustedToken = async (id: string): Promise<TrustedToken> => {
+	let response: TrustedToken = {
+		PO_TOKEN: null,
+		VISITOR_DATA: null
+	}
+	try {
+		const tokens: { visitorData: string, poToken: string} = await generate()
+		response = {
+			PO_TOKEN: tokens?.poToken || null,
+			VISITOR_DATA: tokens?.visitorData || null
+		}
+	}
+	catch (err) {
+		console.error(`Error generating trusted tokens`)
+		console.error(err)
+	}
+	return response 
 }
 
 export const search = async (query: string) => {
@@ -148,5 +190,4 @@ export const search = async (query: string) => {
 	const results = await ytmusic.searchSongs(query)
 
 	return results[0]
-
 }
