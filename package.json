@@ -31,10 +31,11 @@
     "commitizen": "^4.3.0",
     "cz-conventional-changelog": "^3.3.0",
     "cz-git": "^1.7.1",
+    "esbuild": "*",
     "husky": "^8.0.3",
     "lint-staged": "15.2.0",
-    "@discordjs/opus": "latest",
-    "ffmpeg-static": "5.2.0"
+    "@discordjs/opus": "*",
+    "ffmpeg-static": "*"
   },
   "dependencies": {
     "@discordjs/voice": "0.17.0",
