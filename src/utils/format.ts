@@ -2,10 +2,13 @@ import { Track } from "@spotify/web-api-ts-sdk";
 
 export const secondsToMinutesAndSeconds = (time: number | string): string => {
 	let parsedTime = 0
-	if(typeof time === 'string')
+	if(typeof time === 'string') {
 		parsedTime = parseInt(time)
+	} else if(typeof time === 'number') {
+		parsedTime = time
+	}
 	
-	if(isNaN(parsedTime)) return '0:0'
+	if(isNaN(parsedTime) || parsedTime <= 0) return '0:00'
 	const minutes = Math.floor(parsedTime / 60);
 	const seconds = parsedTime - minutes * 60;
 

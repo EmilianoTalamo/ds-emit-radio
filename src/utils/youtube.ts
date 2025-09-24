@@ -2,6 +2,9 @@ import queryString from 'query-string'
 import { URLPattern } from 'urlpattern-polyfill'
 import { getYtInfo as getYtInfoYtDlp, getAudioStream as getAudioStreamYtDlp, getYtPlaylistIds as getYtPlaylistIdsYtDlp, searchYoutube, YtBasicInfo } from './ytdlp.js'
 
+// Re-export types
+export type { YtBasicInfo }
+
 type GetUrlInfoResponse = {
 	videoId: string | null
 	playlistId: string | null

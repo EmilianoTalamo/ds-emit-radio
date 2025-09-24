@@ -49,7 +49,7 @@ export const getVersion = async (): Promise<string> => {
 export const getLastVerion = async (): Promise<string> => {
     try {
         // Get latest yt-dlp version from GitHub releases
-        const { stdout } = await execAsync('curl -s https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest | grep "tag_name" | cut -d\'"\'"\' -f4')
+        const { stdout } = await execAsync('curl -s https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest | jq -r \'.tag_name\'')
         return stdout.trim()
     } catch {
         return 'unknown'
