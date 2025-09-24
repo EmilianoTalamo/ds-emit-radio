@@ -2,7 +2,7 @@ import queryString from 'query-string'
 import { google } from 'googleapis'
 import { URLPattern } from 'urlpattern-polyfill'
 import YTMusic from 'ytmusic-api'
-import { Innertube, UniversalCache } from 'youtubei.js'
+import { ClientType, Innertube, UniversalCache } from 'youtubei.js'
 import { Readable } from 'stream'
 import { getCookies } from './services.js'
 
@@ -78,36 +78,44 @@ export const getUrlInfo = (url: string): GetUrlInfoResponse => {
 let youtubeClient: Innertube | null = null
 
 const getClient = async () => {
-    if (youtubeClient) return youtubeClient
-    youtubeClient = await Innertube.create({ cookie: await getCookies() })
-    return youtubeClient
+	if (youtubeClient) return youtubeClient
+	youtubeClient = await Innertube.create({
+		cache: new UniversalCache(true, './.cache'),
+		user_agent: `Mozilla/5.0 (Macintosh; Intel Mac OS X 15_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15`,
+		client_type: ClientType.MWEB,
+		retrieve_player: true,
+		device_category: 'desktop',
+    enable_session_cache: true,
+		cookie: await getCookies(),
+	})
+	return youtubeClient
 }
 
 export type YtBasicInfo = {
-    title: string
-    lengthSeconds: number
-    thumbnails: { url: string; width?: number; height?: number }[]
+	title: string
+	lengthSeconds: number
+	thumbnails: { url: string; width?: number; height?: number }[]
 }
 
 export const getYtInfo = async (
-    id: string,
+	id: string,
 ): Promise<{ basic_info: YtBasicInfo } | false> => {
-    try {
-        const yt = await getClient()
-        const info = await yt.getInfo(id)
-        const basic = info.basic_info
-        return {
-            basic_info: {
-                title: basic.title || '',
-                lengthSeconds: Number(basic.duration || 0),
-                thumbnails: basic.thumbnail || [],
-            },
-        }
-    } catch (err) {
-        console.error('Error fetching YT info')
-        console.error(err)
-        return false
-    }
+	try {
+		const yt = await getClient()
+		const info = await yt.getInfo(id)
+		const basic = info.basic_info
+		return {
+			basic_info: {
+				title: basic.title || '',
+				lengthSeconds: Number(basic.duration || 0),
+				thumbnails: basic.thumbnail || [],
+			},
+		}
+	} catch (err) {
+		console.error('Error fetching YT info')
+		console.error(err)
+		return false
+	}
 }
 
 export const getYtPlaylistIds = async (id: string) => {
@@ -151,15 +159,15 @@ export const getYtPlaylistIds = async (id: string) => {
 }
 
 export const getAudioStream = async (id: string): Promise<Readable> => {
-    const yt = await getClient()
-    // youtubei.js exposes a download method on the client
-    // Choose an audio-only format
-    const stream = await yt.download(id, {
-        type: 'audio',
-        quality: 'best',
-        format: 'mp4',
-    })
-    return stream as unknown as Readable
+	const yt = await getClient()
+	// youtubei.js exposes a download method on the client
+	// Choose an audio-only format
+	const stream = await yt.download(id, {
+		type: 'audio',
+		quality: 'best',
+		format: 'mp4',
+	})
+	return stream as unknown as Readable
 }
 
 export const search = async (query: string) => {
@@ -169,5 +177,4 @@ export const search = async (query: string) => {
 	const results = await ytmusic.searchSongs(query)
 
 	return results[0]
-
 }

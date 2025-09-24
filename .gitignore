@@ -23,5 +23,6 @@ logs/
 # other
 tests/
 .DS_Store
+.cache/
 
 docker-compose.yml
