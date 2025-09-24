@@ -110,7 +110,8 @@ export const getYtPlaylistIds = async (playlistId: string): Promise<string[] | f
 		const cookiesFlag = cookiesArgs.length > 0 ? ` ${cookiesArgs.join(' ')}` : ''
 		
 		const { stdout } = await execAsync(
-			`yt-dlp --flat-playlist --dump-json --no-warnings${cookiesFlag} "${url}"`
+			`yt-dlp --flat-playlist --dump-json --no-warnings${cookiesFlag} "${url}"`,
+			{ maxBuffer: 200 * 1024 * 1024 } // 200MB buffer for large playlists
 		)
 		
 		const lines = stdout.trim().split('\n').filter(line => line.trim())
