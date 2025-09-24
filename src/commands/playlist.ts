@@ -85,11 +85,12 @@ const handleYoutube = async (
 
 	interaction.editReply('🫡 Your playlist will be added shortly...')
 
-	// add ids to the queue
+	// Add all video IDs to queue - refreshInfo will validate the first 5 as needed
 	for (const id of idsArray) {
 		queue.add({
 			id,
 			title: null,
+			ytdetails: undefined, // Will be populated by refreshInfo for visible items
 		})
 	}
 
@@ -115,6 +116,7 @@ const handleSpotify = async (
 		queue.add({
 			id: null,
 			title: `${joinArtists(track.artist)} - ${track.title}`,
+			ytdetails: undefined, // Will be populated by refreshInfo
 		})
 	}
 

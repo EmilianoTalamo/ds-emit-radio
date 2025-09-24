@@ -25,6 +25,22 @@ pip install yt-dlp
 
 ---
 
-Drop your YT cookies on the root @ `cookies.json` (optional, for age-restricted content)
+## YouTube Cookies (Optional)
 
-Export your cookies with https://www.editthiscookie.com/
+For accessing age-restricted content or improving reliability, you can provide YouTube cookies:
+
+1. **For yt-dlp**: Drop your cookies in `cookies.txt` format at the root directory
+2. **Legacy**: The old `cookies.json` format is no longer used
+
+### How to export cookies:
+
+**Method 1: Browser Extension**
+- Install a cookie exporter extension (e.g., "Get cookies.txt LOCALLY")
+- Visit YouTube and login
+- Export cookies in Netscape format as `cookies.txt`
+
+**Method 2: Manual Export** 
+- Use browser developer tools to copy cookies
+- Format them properly for yt-dlp
+
+The bot will automatically detect and use `cookies.txt` if present.

@@ -77,19 +77,27 @@ export class Player {
 		}
 
 		if (!queue.queue[0].title || !queue.queue[0].id) {
-			// Fauly song with no info, remove and play next
+			// Faulty song with no info, remove and play next
 			queue.removeFirst()
 			this.play()
 			return
 		}
 
-		// Load the audio resource
-        const resource = createAudioResource(await getAudioStream(queue.queue[0].id))
 
-		// Check that the resource is valid
-		if (resource) this.player.play(resource)
-		else {
-			send(this.textChannel, 'Error streaming YouTube data.')
+		try {
+			// Load the audio resource
+			const resource = createAudioResource(await getAudioStream(queue.queue[0].id))
+
+			// Check that the resource is valid
+			if (resource) this.player.play(resource)
+			else {
+				send(this.textChannel, 'Error streaming YouTube data.')
+				return
+			}
+		} catch (error) {
+			console.log(`⚠️  Failed to stream ${queue.queue[0].title}, skipping...`)
+			queue.removeFirst()
+			this.play()
 			return
 		}
 
