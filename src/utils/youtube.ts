@@ -1,9 +1,10 @@
 import queryString from 'query-string'
-import ytdl from '@distube/ytdl-core'
 import { google } from 'googleapis'
 import { URLPattern } from 'urlpattern-polyfill'
 import YTMusic from 'ytmusic-api'
-import { agent } from '@/main.js'
+import { Innertube, UniversalCache } from 'youtubei.js'
+import { Readable } from 'stream'
+import { getCookies } from './services.js'
 
 type GetUrlInfoResponse = {
 	videoId: string | null
@@ -74,21 +75,39 @@ export const getUrlInfo = (url: string): GetUrlInfoResponse => {
 	return res
 }
 
+let youtubeClient: Innertube | null = null
+
+const getClient = async () => {
+    if (youtubeClient) return youtubeClient
+    youtubeClient = await Innertube.create({ cookie: await getCookies() })
+    return youtubeClient
+}
+
+export type YtBasicInfo = {
+    title: string
+    lengthSeconds: number
+    thumbnails: { url: string; width?: number; height?: number }[]
+}
+
 export const getYtInfo = async (
-	id: string,
-): Promise<ytdl.videoInfo | false> => {
-	if (!ytdl.validateID(id)) return false
-
-	let info: ytdl.videoInfo | false = false
-	try {
-		info = await ytdl.getInfo(`http://www.youtube.com/watch?v=${id}`, { agent })
-	} catch (err) {
-		console.error('Error fetching YT info')
-		console.error(err)
-		return false
-	}
-
-	return info
+    id: string,
+): Promise<{ basic_info: YtBasicInfo } | false> => {
+    try {
+        const yt = await getClient()
+        const info = await yt.getInfo(id)
+        const basic = info.basic_info
+        return {
+            basic_info: {
+                title: basic.title || '',
+                lengthSeconds: Number(basic.duration || 0),
+                thumbnails: basic.thumbnail || [],
+            },
+        }
+    } catch (err) {
+        console.error('Error fetching YT info')
+        console.error(err)
+        return false
+    }
 }
 
 export const getYtPlaylistIds = async (id: string) => {
@@ -131,14 +150,16 @@ export const getYtPlaylistIds = async (id: string) => {
 	return videoIds
 }
 
-export const getAudioStream = (id: string) => {
-	return ytdl(`http://youtube.com/watch?v=${id}`, {
-		filter: 'audioonly',
-		quality: 'highestaudio',
-		dlChunkSize: 0,
-		highWaterMark: 1 << 62,
-		liveBuffer: 1 << 62
-	})
+export const getAudioStream = async (id: string): Promise<Readable> => {
+    const yt = await getClient()
+    // youtubei.js exposes a download method on the client
+    // Choose an audio-only format
+    const stream = await yt.download(id, {
+        type: 'audio',
+        quality: 'best',
+        format: 'mp4',
+    })
+    return stream as unknown as Readable
 }
 
 export const search = async (query: string) => {

@@ -91,10 +91,10 @@ class Queue {
 			this.remove(item)
 			return false
 		}
-		const ytinfo = await getYtInfo(item.id)
-		if (ytinfo) {
-			item.title = item.title ? item.title : ytinfo.videoDetails.title
-			item.ytdetails = ytinfo.videoDetails
+        const ytinfo = await getYtInfo(item.id)
+        if (ytinfo) {
+            item.title = item.title ? item.title : ytinfo.basic_info.title
+            item.ytdetails = ytinfo.basic_info
 		} else {
 			queue.remove(item)
 			return false

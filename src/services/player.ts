@@ -84,7 +84,7 @@ export class Player {
 		}
 
 		// Load the audio resource
-		const resource = createAudioResource(getAudioStream(queue.queue[0].id))
+        const resource = createAudioResource(await getAudioStream(queue.queue[0].id))
 
 		// Check that the resource is valid
 		if (resource) this.player.play(resource)
@@ -131,10 +131,10 @@ export class Player {
 const generateNowPlayingEmbed = () => {
 	return new EmbedBuilder()
 		.setColor(player.color)
-		.setDescription(
-			`${player.repeat ? '🔁' : '▶️'}  Now ${player.repeat ? 'repeating' : 'playing'} (${secondsToMinutesAndSeconds(queue.queue[0].ytdetails?.lengthSeconds || 0)})`,
-		)
+        .setDescription(
+            `${player.repeat ? '🔁' : '▶️'}  Now ${player.repeat ? 'repeating' : 'playing'} (${secondsToMinutesAndSeconds(queue.queue[0].ytdetails?.lengthSeconds || 0)})`,
+        )
 		.setTitle(queue.queue[0].title || 'song')
 		.setURL(`https://youtu.be/${queue.queue[0].id}`)
-		.setThumbnail(queue.queue[0].ytdetails?.thumbnails[0].url || null)
+        .setThumbnail(queue.queue[0].ytdetails?.thumbnails?.[0]?.url || null)
 }

@@ -6,6 +6,7 @@ import {
 } from './utils/commands.js'
 import { REST } from 'discord.js'
 
+import { Log } from 'youtubei.js'
 import { Events } from 'discord.js'
 import { idlePresence } from './handlers/activity.js'
 import { config, instances } from './config.js'
@@ -19,9 +20,10 @@ const guildId = process.env.DS_GUILD_ID
 export const { queue, player, connection, spotify } = instances()
 
 // Config
-export const { client, agent, lastversion, currentVersion } = await config()
+export const { client, lastversion, currentVersion } = await config()
 
 const main = async () => {
+	Log.setLevel(Log.Level.WARNING);
 	const loadCommandsResult = await loadCommands(client)
 	if (loadCommandsResult) console.info('✅ Successfully loaded commands.')
 	else console.error('❌ Error loading commands.')
@@ -32,8 +34,8 @@ const main = async () => {
 	console.info('✅ Done Registering commands to Discord...')
 
 	client.once(Events.ClientReady, (readyClient) => {
-		console.info(`\nℹ️ Current ytdl version: ${currentVersion}`)
-		console.info(`🆕 Lastest ytdl version: ${lastversion}`)
+        console.info(`\nℹ️ Current youtube client: ${currentVersion}`)
+        console.info(`🆕 Latest youtube client version: ${lastversion}`)
 		console.info(`\n🏃 Ready! Logged in as ${readyClient.user.tag}`)
 		idlePresence()
 	})

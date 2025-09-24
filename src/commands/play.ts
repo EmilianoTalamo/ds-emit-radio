@@ -80,21 +80,21 @@ const handleYoutube = async (
 	}
 
 	// Get youtube video information
-	const ytinfo = await getYtInfo(urlInfo.videoId)
+    const ytinfo = await getYtInfo(urlInfo.videoId)
 	if (!ytinfo) {
 		await interaction.editReply(`Invalid ID: ${urlInfo.videoId}`)
 		return ''
 	}
 
 	// Add to the queue
-	const queueItem = {
-		id: urlInfo.videoId,
-		title: ytinfo.videoDetails.title,
-		ytdetails: ytinfo.videoDetails,
-	}
+    const queueItem = {
+        id: urlInfo.videoId,
+        title: ytinfo.basic_info.title,
+        ytdetails: ytinfo.basic_info,
+    }
 	next ? queue.addNext(queueItem) : queue.add(queueItem)
 
-	return ytinfo.videoDetails.title
+    return ytinfo.basic_info.title
 }
 
 const handleSpotify = async (

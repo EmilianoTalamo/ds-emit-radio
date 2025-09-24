@@ -1,7 +1,22 @@
-import ytdl, { Cookie } from '@distube/ytdl-core'
-import ytdlCore from '@distube/ytdl-core/package.json'
+// Keeping Cookie type local to avoid ytdl-core import
+export type Cookie = {
+    domain?: string
+    expirationDate?: number
+    hostOnly?: boolean
+    httpOnly?: boolean
+    name: string
+    path?: string
+    sameSite?: string
+    secure?: boolean
+    session?: boolean
+    storeId?: string
+    value: string
+    id?: number
+}
 import latestVersion from 'latest-version'
-// import cookies from '~/cookies.json'
+import youtubeiPkg from 'youtubei.js/package.json' with { type: 'json' }
+import { readFile } from 'fs/promises'
+import path from 'path'
 
 export const identifyService = (url: string): 'spotify' | 'youtube' => {
 	if (url.includes('spotify')) return 'spotify'
@@ -9,19 +24,19 @@ export const identifyService = (url: string): 'spotify' | 'youtube' => {
 	return 'youtube'
 }
 
-export const getCookies = async (): Promise<Cookie[]> => {
-	try {
-		const cookies: Cookie[] = (await import('cookies.json')).default
-		return cookies
-	}
-	catch (err) {
-		console.info('No cookies file present')
-		return []
-	}
+export const getCookies = async (): Promise<string> => {
+    try {
+        const filePath = path.resolve(process.cwd(), 'cookie.txt')
+        const content = await readFile(filePath, 'utf8')
+        return content.trim()
+    } catch (err) {
+        console.info('No cookie.txt file present')
+        return ''
+    }
 }
 
-export const getVersion = () => ytdlCore.version
+export const getVersion = () => youtubeiPkg.version
 
 export const getLastVerion = async () => {
-	return await latestVersion('@distube/ytdl-core')
+    return await latestVersion('youtubei.js')
 }

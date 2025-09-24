@@ -5,6 +5,7 @@ node_modules/
 .env
 .env.local
 cookies.json
+cookie.txt
 
 # build
 build/
