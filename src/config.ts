@@ -32,7 +32,7 @@ export const config = async () => {
 
 	const lastversion = await getLastVerion()
 
-	const currentVersion = getVersion()
+	const currentVersion = await getVersion()
 
 	return {
 		client,
@@ -56,4 +56,4 @@ const setColor = () => {
 	player.color = (process.env.BOT_COLOR as ColorResolvable) || 'Default'
 }
 
-// Removed ytdl agent configuration; youtubei.js manages requests internally.
+// Removed ytdl agent configuration; now using yt-dlp command line tool.

@@ -3,7 +3,8 @@ FROM node:22.19.0-bullseye-slim
 RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get update -y \
 	&& apt-get install -y -q --no-install-recommends \
-		ffmpeg libogg0 libopus0 opus-tools python3
+		ffmpeg libogg0 libopus0 opus-tools python3 python3-pip curl \
+	&& pip3 install --no-cache-dir yt-dlp
 
 RUN npm i -g node-gyp esbuild
 

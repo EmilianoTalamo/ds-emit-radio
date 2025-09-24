@@ -20,5 +20,5 @@ services:
       - /bin/sh
       - -c
       - |
-        npm i --verbose --foreground-scripts --include=dev --arch=x64 --platform=linux && npm update youtubei.js
+        npm i --verbose --foreground-scripts --include=dev --arch=x64 --platform=linux
         npm run start

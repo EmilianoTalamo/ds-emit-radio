@@ -13,10 +13,12 @@ export type Cookie = {
     value: string
     id?: number
 }
-import latestVersion from 'latest-version'
-import youtubeiPkg from 'youtubei.js/package.json' with { type: 'json' }
 import { readFile } from 'fs/promises'
 import path from 'path'
+import { exec } from 'child_process'
+import { promisify } from 'util'
+
+const execAsync = promisify(exec)
 
 export const identifyService = (url: string): 'spotify' | 'youtube' => {
 	if (url.includes('spotify')) return 'spotify'
@@ -35,8 +37,21 @@ export const getCookies = async (): Promise<string> => {
     }
 }
 
-export const getVersion = () => youtubeiPkg.version
+export const getVersion = async (): Promise<string> => {
+    try {
+        const { stdout } = await execAsync('yt-dlp --version')
+        return stdout.trim()
+    } catch {
+        return 'yt-dlp not installed'
+    }
+}
 
-export const getLastVerion = async () => {
-    return await latestVersion('youtubei.js')
+export const getLastVerion = async (): Promise<string> => {
+    try {
+        // Get latest yt-dlp version from GitHub releases
+        const { stdout } = await execAsync('curl -s https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest | grep "tag_name" | cut -d\'"\'"\' -f4')
+        return stdout.trim()
+    } catch {
+        return 'unknown'
+    }
 }
