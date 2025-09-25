@@ -88,13 +88,23 @@ export const getAudioStream = async (id: string): Promise<Readable> => {
 		throw new Error('Failed to create yt-dlp audio stream')
 	}
 
-	// Handle errors
+	// Handle errors - filter out harmless broken pipe errors
 	ytdlp.stderr?.on('data', (data) => {
-		console.error('yt-dlp stderr:', data.toString())
+		const errorMessage = data.toString().trim()
+		// Filter out harmless broken pipe errors that occur during normal operation
+		if (errorMessage && 
+			!errorMessage.includes('Broken pipe') && 
+			!errorMessage.includes('unable to write data') &&
+			!errorMessage.includes('[Errno 32]')) {
+			console.error('yt-dlp stderr:', errorMessage)
+		}
 	})
 
 	ytdlp.on('error', (error) => {
-		console.error('yt-dlp process error:', error)
+		// Only log non-EPIPE errors as they're the only ones that matter
+		if (!error.message.includes('EPIPE') && !error.message.includes('Broken pipe')) {
+			console.error('yt-dlp process error:', error)
+		}
 	})
 
 	return ytdlp.stdout
