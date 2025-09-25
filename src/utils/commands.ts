@@ -58,6 +58,28 @@ export const registerCommands = async (
 
 export const handleCommands = async (client: any) => {
 	client.on(Events.InteractionCreate, async (interaction: any) => {
+		// Handle autocomplete interactions
+		if (interaction.isAutocomplete()) {
+			const command = interaction.client.commands.get(interaction.commandName)
+
+			if (!command) {
+				console.error(`No command matching ${interaction.commandName} was found.`)
+				return
+			}
+
+			if (!command.autocomplete) {
+				return
+			}
+
+			try {
+				await command.autocomplete(interaction)
+			} catch (error) {
+				console.error('Autocomplete error:', error)
+			}
+			return
+		}
+
+		// Handle chat input command interactions
 		if (!interaction.isChatInputCommand()) return
 		const command = interaction.client.commands.get(interaction.commandName)
 

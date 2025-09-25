@@ -25,6 +25,31 @@ pip install yt-dlp
 
 ---
 
+## YouTube Data API (Required for Search Command)
+
+To use the `/search` command with real-time autocomplete, you need a YouTube Data API v3 key:
+
+1. **Get API Key:**
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create or select a project
+   - Enable "YouTube Data API v3"
+   - Create credentials (API Key)
+   - Restrict the key to YouTube Data API v3
+
+2. **Set Environment Variable:**
+   ```bash
+   export GOOGLE_API_KEY=your_api_key_here
+   ```
+
+3. **Add to your environment file:**
+   ```bash
+   GOOGLE_API_KEY=your_api_key_here
+   ```
+
+**Note:** The search command will be disabled if no API key is provided. Other commands will continue to work normally.
+
+---
+
 ## YouTube Cookies (Optional)
 
 For accessing age-restricted content or improving reliability, you can provide YouTube cookies:

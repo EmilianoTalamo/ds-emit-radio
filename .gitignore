@@ -26,3 +26,4 @@ tests/
 .cache/
 
 docker-compose.yml
+tsconfig.tsbuildinfo
