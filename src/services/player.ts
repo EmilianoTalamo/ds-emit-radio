@@ -85,8 +85,15 @@ export class Player {
 
 
 		try {
-			// Load the audio resource
-			const resource = createAudioResource(await getAudioStream(queue.queue[0].id))
+			// Load the audio resource with volume control (33% volume)
+			const resource = createAudioResource(await getAudioStream(queue.queue[0].id), {
+				inlineVolume: true
+			})
+
+			// Set volume to 20%
+			if (resource.volume) {
+				resource.volume.setVolume(0.2)
+			}
 
 			// Check that the resource is valid
 			if (resource) this.player.play(resource)
