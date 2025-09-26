@@ -23,6 +23,38 @@ export const { queue, player, connection, spotify } = instances()
 // Config
 export const { client, lastversion, currentVersion } = await config()
 
+// Global error handlers to prevent crashes
+process.on('unhandledRejection', (reason, promise) => {
+	console.error('🚨 Unhandled Promise Rejection:', reason)
+	// Don't crash the bot for network timeouts and other recoverable errors
+	if (reason && typeof reason === 'object' && 'code' in reason) {
+		const errorCode = (reason as any).code
+		if (errorCode === 'UND_ERR_CONNECT_TIMEOUT' || 
+			errorCode === 'ECONNRESET' || 
+			errorCode === 'ENOTFOUND' || 
+			errorCode === 'ETIMEDOUT') {
+			console.log('⚠️  Network error occurred, but bot will continue running')
+			return
+		}
+	}
+	console.error('Promise:', promise)
+})
+
+process.on('uncaughtException', (error) => {
+	console.error('🚨 Uncaught Exception:', error)
+	// Don't crash for network-related errors
+	if (error.message?.includes('Connect Timeout Error') || 
+		error.message?.includes('UND_ERR_CONNECT_TIMEOUT') ||
+		error.message?.includes('ECONNRESET') ||
+		error.message?.includes('ETIMEDOUT')) {
+		console.log('⚠️  Network timeout occurred, but bot will continue running')
+		return
+	}
+	// For other critical errors, still exit
+	console.error('💀 Critical error - bot will restart')
+	process.exit(1)
+})
+
 const main = async () => {
 	// Check if yt-dlp is installed
 	const ytDlpInstalled = await checkYtDlpInstalled()

@@ -37,6 +37,7 @@ export const getYtInfo = async (
 		
 		const { stdout } = await execAsync(
 			`yt-dlp --dump-json --no-playlist --extractor-args "youtube:player-client=default,-tv_simply"${cookiesFlag} "${url}"`,
+			{ timeout: 15000 } // 15 second timeout
 		)
 		
 		const info = JSON.parse(stdout.trim())
@@ -49,6 +50,12 @@ export const getYtInfo = async (
 			},
 		}
 	} catch (err: any) {
+		// Handle timeout and network errors gracefully
+		if (err.killed && err.signal === 'SIGTERM') {
+			console.log(`⚠️  Timeout fetching info for video ${id}`)
+			return false
+		}
+		
 		// Check for specific error types to reduce spam
 		const stderr = err.stderr || ''
 		if (stderr.includes('Video unavailable') || 
@@ -56,6 +63,15 @@ export const getYtInfo = async (
 			stderr.includes('has been terminated') ||
 			stderr.includes('This video is not available')) {
 			console.log(`⚠️  Video ${id} is unavailable (${stderr.includes('Private') ? 'private' : 'deleted/terminated'})`)
+			return false
+		}
+		
+		// Handle network errors without spamming logs
+		if (err.message?.includes('Connect Timeout Error') ||
+			err.code === 'ETIMEDOUT' ||
+			err.code === 'ECONNRESET' ||
+			err.code === 'ENOTFOUND') {
+			console.log(`⚠️  Network error fetching info for video ${id}`)
 			return false
 		}
 		
@@ -122,7 +138,10 @@ export const getYtPlaylistIds = async (playlistId: string): Promise<string[] | f
 		
 		const { stdout } = await execAsync(
 			`yt-dlp --flat-playlist --dump-json --no-warnings --extractor-args "youtube:player-client=default,-tv_simply"${cookiesFlag} "${url}"`,
-			{ maxBuffer: 200 * 1024 * 1024 } // 200MB buffer for large playlists
+			{ 
+				maxBuffer: 200 * 1024 * 1024, // 200MB buffer for large playlists
+				timeout: 30000 // 30 second timeout for playlists
+			}
 		)
 		
 		const lines = stdout.trim().split('\n').filter(line => line.trim())
@@ -141,7 +160,21 @@ export const getYtPlaylistIds = async (playlistId: string): Promise<string[] | f
 		}
 		
 		return videoIds
-	} catch (error) {
+	} catch (error: any) {
+		// Handle timeout and network errors gracefully
+		if (error.killed && error.signal === 'SIGTERM') {
+			console.log(`⚠️  Timeout fetching playlist ${playlistId}`)
+			return false
+		}
+		
+		if (error.message?.includes('Connect Timeout Error') ||
+			error.code === 'ETIMEDOUT' ||
+			error.code === 'ECONNRESET' ||
+			error.code === 'ENOTFOUND') {
+			console.log(`⚠️  Network error fetching playlist ${playlistId}`)
+			return false
+		}
+		
 		console.error('Error fetching playlist video IDs with yt-dlp:', error)
 		return false
 	}
@@ -156,7 +189,8 @@ export const searchYoutube = async (query: string): Promise<any> => {
 		const cookiesFlag = cookiesArgs.length > 0 ? ` ${cookiesArgs.join(' ')}` : ''
 		
 		const { stdout, stderr } = await execAsync(
-			`yt-dlp "ytsearch:${query}" --dump-json --no-playlist --max-downloads 1 --extractor-args "youtube:player-client=default,-tv_simply"${cookiesFlag}`
+			`yt-dlp "ytsearch:${query}" --dump-json --no-playlist --max-downloads 1 --extractor-args "youtube:player-client=default,-tv_simply"${cookiesFlag}`,
+			{ timeout: 20000 } // 20 second timeout for searches
 		)
 		
 		const info = JSON.parse(stdout.trim())
@@ -168,6 +202,20 @@ export const searchYoutube = async (query: string): Promise<any> => {
 			}
 		}
 	} catch (error: any) {
+		// Handle timeout and network errors gracefully
+		if (error.killed && error.signal === 'SIGTERM') {
+			console.log(`⚠️  Timeout searching for: ${query}`)
+			return null
+		}
+		
+		if (error.message?.includes('Connect Timeout Error') ||
+			error.code === 'ETIMEDOUT' ||
+			error.code === 'ECONNRESET' ||
+			error.code === 'ENOTFOUND') {
+			console.log(`⚠️  Network error searching for: ${query}`)
+			return null
+		}
+		
 		// yt-dlp sometimes exits with code 101 even on successful searches
 		// Check if there's valid JSON output in the error
 		if (error.stdout && error.stdout.trim()) {

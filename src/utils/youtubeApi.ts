@@ -36,8 +36,8 @@ class YouTubeAPI {
 		}
 
 		try {
-			// Search with music focus but less restrictive
-			const response = await this.youtube.search.list({
+			// Add timeout to prevent hanging requests
+			const searchPromise = this.youtube.search.list({
 				part: ['snippet'],
 				q: query,
 				type: ['video'],
@@ -48,6 +48,12 @@ class YouTubeAPI {
 				videoDuration: 'any', // Allow any duration for better results
 				safeSearch: 'none',
 			})
+
+			const timeoutPromise = new Promise((_, reject) => {
+				setTimeout(() => reject(new Error('YouTube API search timeout')), 10000) // 10 second timeout
+			})
+
+			const response = await Promise.race([searchPromise, timeoutPromise]) as any
 
 			if (!response.data.items) {
 				return []
@@ -136,6 +142,15 @@ class YouTubeAPI {
 				})
 				.filter(Boolean) as YouTubeSearchResult[]
 		} catch (error: any) {
+			// Handle specific timeout and network errors gracefully
+			if (error.message?.includes('timeout') || 
+				error.message?.includes('Connect Timeout Error') ||
+				error.code === 'UND_ERR_CONNECT_TIMEOUT' ||
+				error.code === 'ECONNRESET' ||
+				error.code === 'ETIMEDOUT') {
+				console.log('⚠️  YouTube API search timeout - returning empty results')
+				return []
+			}
 			console.error('YouTube API search error:', error.message)
 			return []
 		}
@@ -148,16 +163,32 @@ class YouTubeAPI {
 		if (!videoIds.length) return []
 
 		try {
-			const response = await this.youtube.videos.list({
+			// Add timeout to prevent hanging requests
+			const detailsPromise = this.youtube.videos.list({
 				part: ['contentDetails'],
 				id: videoIds,
 			})
 
-			return response.data.items?.map(item => ({
+			const timeoutPromise = new Promise((_, reject) => {
+				setTimeout(() => reject(new Error('YouTube API details timeout')), 8000) // 8 second timeout
+			})
+
+			const response = await Promise.race([detailsPromise, timeoutPromise]) as any
+
+			return response.data.items?.map((item: any) => ({
 				id: item.id || '',
 				duration: this.parseDuration(item.contentDetails?.duration || ''),
 			})) || []
-		} catch (error) {
+		} catch (error: any) {
+			// Handle timeout and network errors gracefully
+			if (error.message?.includes('timeout') || 
+				error.message?.includes('Connect Timeout Error') ||
+				error.code === 'UND_ERR_CONNECT_TIMEOUT' ||
+				error.code === 'ECONNRESET' ||
+				error.code === 'ETIMEDOUT') {
+				console.log('⚠️  YouTube API details timeout - returning empty details')
+				return []
+			}
 			console.error('Error fetching video details:', error)
 			return []
 		}
