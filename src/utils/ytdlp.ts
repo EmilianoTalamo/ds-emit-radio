@@ -36,7 +36,7 @@ export const getYtInfo = async (
 		const cookiesFlag = cookiesArgs.length > 0 ? ` ${cookiesArgs.join(' ')}` : ''
 		
 		const { stdout } = await execAsync(
-			`yt-dlp --dump-json --no-playlist${cookiesFlag} "${url}"`,
+			`yt-dlp --dump-json --no-playlist --extractor-args "youtube:player-client=default,-tv_simply"${cookiesFlag} "${url}"`,
 		)
 		
 		const info = JSON.parse(stdout.trim())
@@ -78,6 +78,7 @@ export const getAudioStream = async (id: string): Promise<Readable> => {
 		'--output', '-',
 		'--quiet',
 		'--no-playlist',
+		'--extractor-args', 'youtube:player-client=default,-tv_simply',
 		...cookiesArgs,
 		url
 	]
@@ -120,7 +121,7 @@ export const getYtPlaylistIds = async (playlistId: string): Promise<string[] | f
 		const cookiesFlag = cookiesArgs.length > 0 ? ` ${cookiesArgs.join(' ')}` : ''
 		
 		const { stdout } = await execAsync(
-			`yt-dlp --flat-playlist --dump-json --no-warnings${cookiesFlag} "${url}"`,
+			`yt-dlp --flat-playlist --dump-json --no-warnings --extractor-args "youtube:player-client=default,-tv_simply"${cookiesFlag} "${url}"`,
 			{ maxBuffer: 200 * 1024 * 1024 } // 200MB buffer for large playlists
 		)
 		
@@ -155,7 +156,7 @@ export const searchYoutube = async (query: string): Promise<any> => {
 		const cookiesFlag = cookiesArgs.length > 0 ? ` ${cookiesArgs.join(' ')}` : ''
 		
 		const { stdout, stderr } = await execAsync(
-			`yt-dlp "ytsearch:${query}" --dump-json --no-playlist --max-downloads 1${cookiesFlag}`
+			`yt-dlp "ytsearch:${query}" --dump-json --no-playlist --max-downloads 1 --extractor-args "youtube:player-client=default,-tv_simply"${cookiesFlag}`
 		)
 		
 		const info = JSON.parse(stdout.trim())
