@@ -88,18 +88,25 @@ export const getAudioStream = async (id: string): Promise<Readable> => {
 	const url = `https://www.youtube.com/watch?v=${id}`
 	const cookiesArgs = getCookiesArgs()
 	
-	// Use yt-dlp to get the best audio format URL
+	// Use yt-dlp to get the best audio format URL with options for long streams
 	const args = [
 		'--format', 'bestaudio/best',
 		'--output', '-',
 		'--quiet',
 		'--no-playlist',
 		'--extractor-args', 'youtube:player-client=default,-tv_simply',
+		'--buffer-size', '16K', // Smaller buffer to reduce memory usage
+		'--no-part', // Don't create .part files
+		'--retries', '3', // Retry failed downloads
+		'--fragment-retries', '3', // Retry failed fragments
 		...cookiesArgs,
 		url
 	]
 	
-	const ytdlp = spawn('yt-dlp', args)
+	const ytdlp = spawn('yt-dlp', args, {
+		stdio: ['ignore', 'pipe', 'pipe'],
+		// Don't set a timeout on the spawn process itself for long videos
+	})
 
 	if (!ytdlp.stdout) {
 		throw new Error('Failed to create yt-dlp audio stream')
@@ -112,7 +119,8 @@ export const getAudioStream = async (id: string): Promise<Readable> => {
 		if (errorMessage && 
 			!errorMessage.includes('Broken pipe') && 
 			!errorMessage.includes('unable to write data') &&
-			!errorMessage.includes('[Errno 32]')) {
+			!errorMessage.includes('[Errno 32]') &&
+			!errorMessage.includes('fragment retries')) {
 			console.error('yt-dlp stderr:', errorMessage)
 		}
 	})
@@ -121,6 +129,13 @@ export const getAudioStream = async (id: string): Promise<Readable> => {
 		// Only log non-EPIPE errors as they're the only ones that matter
 		if (!error.message.includes('EPIPE') && !error.message.includes('Broken pipe')) {
 			console.error('yt-dlp process error:', error)
+		}
+	})
+
+	// Handle process exit
+	ytdlp.on('exit', (code, signal) => {
+		if (code !== 0 && code !== null && signal !== 'SIGTERM') {
+			console.log(`⚠️  yt-dlp process exited with code ${code} for video ${id}`)
 		}
 	})
 

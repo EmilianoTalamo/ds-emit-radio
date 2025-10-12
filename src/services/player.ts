@@ -42,6 +42,18 @@ export class Player {
 		this.player.on('error', async (err) => {
 			console.error('AudioPlayer error')
 			console.error(err)
+			
+			// Handle specific error types that might indicate stream issues
+			const errorMessage = err.message.toLowerCase()
+			if (errorMessage.includes('stream') || 
+				errorMessage.includes('connection') ||
+				errorMessage.includes('timeout') ||
+				errorMessage.includes('network')) {
+				console.log(`⚠️  Stream issue detected for ${queue.queue[0]?.title}, attempting to continue...`)
+				// Don't immediately skip, let it try to recover
+				return
+			}
+			
 			await send(
 				this.textChannel,
 				`💥 ${err.message} on ${queue.queue[0].title}`,
@@ -85,15 +97,26 @@ export class Player {
 
 
 		try {
-			// Load the audio resource with volume control (33% volume)
-			const resource = createAudioResource(await getAudioStream(queue.queue[0].id), {
-				inlineVolume: true
+			// Load the audio resource with volume control and stream options for long videos
+			const stream = await getAudioStream(queue.queue[0].id)
+			const resource = createAudioResource(stream, {
+				inlineVolume: true,
+				metadata: {
+					title: queue.queue[0].title,
+					id: queue.queue[0].id
+				}
 			})
 
 			// Set volume to 20%
 			if (resource.volume) {
 				resource.volume.setVolume(0.2)
 			}
+
+			// Handle stream errors to prevent premature stopping
+			stream.on('error', (error) => {
+				console.error(`Stream error for ${queue.queue[0].title}:`, error.message)
+				// Don't immediately skip, let the audio player handle it
+			})
 
 			// Check that the resource is valid
 			if (resource) this.player.play(resource)
