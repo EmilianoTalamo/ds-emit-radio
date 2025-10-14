@@ -50,6 +50,21 @@ process.on('uncaughtException', (error) => {
 		console.log('⚠️  Network timeout occurred, but bot will continue running')
 		return
 	}
+	// Don't crash for property access errors on undefined objects (common in audio streaming)
+	if (error.message?.includes('Cannot read properties of undefined') ||
+		error.message?.includes('Cannot read property') ||
+		error instanceof TypeError && error.message.includes('undefined')) {
+		console.log('⚠️  Property access error occurred (likely audio stream issue), but bot will continue running')
+		// Try to reset the player state
+		try {
+			if (player) {
+				player.stop()
+			}
+		} catch (resetError) {
+			console.error('Failed to reset player:', resetError)
+		}
+		return
+	}
 	// For other critical errors, still exit
 	console.error('💀 Critical error - bot will restart')
 	process.exit(1)

@@ -20,5 +20,6 @@ services:
       - /bin/sh
       - -c
       - |
+        pip3 install --no-cache-dir --break-system-packages --upgrade yt-dlp
         npm i --verbose --foreground-scripts --include=dev --arch=x64 --platform=linux
         npm run start

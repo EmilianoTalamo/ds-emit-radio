@@ -52,6 +52,12 @@ class Queue {
 
 	removeFirst() {
 		this.queue.shift()
+		// Don't automatically refresh - let the caller decide when to refresh
+	}
+
+	// Remove first item and refresh - used when not followed by play()
+	removeFirstAndRefresh() {
+		this.queue.shift()
 		this.refreshInfo()
 	}
 
@@ -72,6 +78,8 @@ class Queue {
 		let processed = 0
 		let i = 0
 		
+		console.log(`🔄 RefreshInfo: Processing queue (${this.queue.length} items)`)
+		
 		while (i < this.queue.length && i < 5 && processed < 5) {
 			const item = this.queue[i]
 			if (!item) {
@@ -79,26 +87,40 @@ class Queue {
 				continue
 			}
 			
+			let shouldIncrement = true
+			
 			if (!item.id && item.title) {
 				// Queue item with title but no yt id (from Spotify)
+				console.log(`🔍 Processing item ${i}: "${item.title}" (searching for YouTube ID)`)
 				processed++
 				const result = await this.getId(item)
 				if (!result) {
 					// Item was removed, don't increment i to check the new item at this index
-					continue
+					console.log(`❌ Item ${i} removed: "${item.title}"`)
+					shouldIncrement = false
+				} else {
+					console.log(`✅ Item ${i} processed: "${item.title}" -> ${item.id}`)
 				}
 			} else if (item.id && (!item.title || !item.ytdetails)) {
 				// Queue item with ytid but missing title or ytdetails
+				console.log(`🔍 Processing item ${i}: ${item.id} (getting video info)`)
 				processed++
 				const result = await this.getInfo(item)
 				if (!result) {
 					// Item was removed, don't increment i to check the new item at this index
-					continue
+					console.log(`❌ Item ${i} removed: ${item.id}`)
+					shouldIncrement = false
+				} else {
+					console.log(`✅ Item ${i} processed: ${item.id} -> "${item.title}"`)
 				}
 			}
 			
-			i++
+			if (shouldIncrement) {
+				i++
+			}
 		}
+		
+		console.log(`🔄 RefreshInfo complete: ${processed} items processed, ${this.queue.length} items remaining`)
 	}
 
 	getInfo = async (item: QueueItem) => {
@@ -140,9 +162,18 @@ class Queue {
 
 		item.id = ytEquivalent.videoDetails?.videoId || ytEquivalent.videoId
 
-		// Get info for the found video
-		const result = await this.getInfo(item)
-		return result
+		// Now get the full info for the found video
+		const ytinfo = await getYtInfo(item.id)
+		if (ytinfo) {
+			item.title = item.title ? item.title : ytinfo.basic_info.title
+			item.ytdetails = ytinfo.basic_info
+			return true
+		} else {
+			// The found video is also unavailable
+			console.log(`⚠️  Found video ${item.id} is also unavailable for: "${item.title}"`)
+			this.remove(item)
+			return false
+		}
 	}
 }
 

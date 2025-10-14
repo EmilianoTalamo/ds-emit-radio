@@ -27,52 +27,85 @@ export class Player {
 		this.color = 'Default'
 
 		this.player.on(AudioPlayerStatus.Playing, () => {
-			if (queue.queue[0]) {
-				this.setStatus('playing')
+			try {
+				if (queue.queue[0]) {
+					this.setStatus('playing')
+				}
+			} catch (error) {
+				console.error('Error in Playing status handler:', error)
 			}
 		})
 
 		this.player.on(AudioPlayerStatus.Idle, () => {
-			if (!this.repeat) queue.removeFirst()
-			if (!queue.queue.length) {
-				this.setStatus('idle')
-			} else this.play()
+			try {
+				if (!this.repeat) queue.removeFirst()
+				if (!queue.queue.length) {
+					this.setStatus('idle')
+				} else {
+					// play() will call refreshInfo(), so we don't need to call it separately
+					this.play()
+				}
+			} catch (error) {
+				console.error('Error in Idle status handler:', error)
+				// Attempt to set status to idle as a fallback
+				try {
+					this.setStatus('idle')
+				} catch (statusError) {
+					console.error('Failed to set status to idle:', statusError)
+				}
+			}
 		})
 
 		this.player.on('error', async (err) => {
-			console.error('AudioPlayer error')
-			console.error(err)
-			
-			// Handle specific error types that might indicate stream issues
-			const errorMessage = err.message.toLowerCase()
-			if (errorMessage.includes('stream') || 
-				errorMessage.includes('connection') ||
-				errorMessage.includes('timeout') ||
-				errorMessage.includes('network')) {
-				console.log(`⚠️  Stream issue detected for ${queue.queue[0]?.title}, attempting to continue...`)
-				// Don't immediately skip, let it try to recover
-				return
-			}
-			
-			await send(
-				this.textChannel,
-				`💥 ${err.message} on ${queue.queue[0].title}`,
-			)
-			if (err.message === 'Status code: 403') {
-				this.stop()
+			try {
+				console.error('AudioPlayer error')
+				console.error(err)
+				
+				// Handle specific error types that might indicate stream issues
+				const errorMessage = err.message.toLowerCase()
+				if (errorMessage.includes('stream') || 
+					errorMessage.includes('connection') ||
+					errorMessage.includes('timeout') ||
+					errorMessage.includes('network')) {
+					const currentSong = queue.queue[0]
+					const songTitle = currentSong?.title || 'Unknown song'
+					console.log(`⚠️  Stream issue detected for ${songTitle}, attempting to continue...`)
+					// Don't immediately skip, let it try to recover
+					return
+				}
+				
+				// Safely get current song info
+				const currentSong = queue.queue[0]
+				const songTitle = currentSong?.title || 'Unknown song'
+				
 				await send(
 					this.textChannel,
-					`☠️ Restarting bot due to 403 error. Wait a minute before using another command.`,
+					`💥 ${err.message} on ${songTitle}`,
 				)
-				return process.exit()
-			}
-			this.errors++
-			if (this.errors >= 5) {
-				send(
-					this.textChannel,
-					`❌ Aborting player to avoid spam due to multiple errors.`,
-				)
-				this.stop()
+				if (err.message === 'Status code: 403') {
+					this.stop()
+					await send(
+						this.textChannel,
+						`☠️ Restarting bot due to 403 error. Wait a minute before using another command.`,
+					)
+					return process.exit()
+				}
+				this.errors++
+				if (this.errors >= 5) {
+					send(
+						this.textChannel,
+						`❌ Aborting player to avoid spam due to multiple errors.`,
+					)
+					this.stop()
+				}
+			} catch (handlerError) {
+				console.error('Critical error in error handler:', handlerError)
+				// Attempt to stop the player gracefully
+				try {
+					this.stop()
+				} catch (stopError) {
+					console.error('Failed to stop player during error recovery:', stopError)
+				}
 			}
 		})
 	}
@@ -88,8 +121,10 @@ export class Player {
 			return false
 		}
 
-		if (!queue.queue[0].title || !queue.queue[0].id) {
+		const currentSong = queue.queue[0]
+		if (!currentSong || !currentSong.title || !currentSong.id) {
 			// Faulty song with no info, remove and play next
+			console.log('⚠️  Removing faulty song from queue')
 			queue.removeFirst()
 			this.play()
 			return
@@ -98,12 +133,12 @@ export class Player {
 
 		try {
 			// Load the audio resource with volume control and stream options for long videos
-			const stream = await getAudioStream(queue.queue[0].id)
+			const stream = await getAudioStream(currentSong.id)
 			const resource = createAudioResource(stream, {
 				inlineVolume: true,
 				metadata: {
-					title: queue.queue[0].title,
-					id: queue.queue[0].id
+					title: currentSong.title,
+					id: currentSong.id
 				}
 			})
 
@@ -112,11 +147,17 @@ export class Player {
 				resource.volume.setVolume(0.2)
 			}
 
-			// Handle stream errors to prevent premature stopping
-			stream.on('error', (error) => {
-				console.error(`Stream error for ${queue.queue[0].title}:`, error.message)
+		// Handle stream errors to prevent premature stopping
+		stream.on('error', (error) => {
+			try {
+				const currentSong = queue.queue[0]
+				const songTitle = currentSong?.title || 'Unknown song'
+				console.error(`Stream error for ${songTitle}:`, error.message)
 				// Don't immediately skip, let the audio player handle it
-			})
+			} catch (err) {
+				console.error('Stream error occurred, but failed to log details:', err)
+			}
+		})
 
 			// Check that the resource is valid
 			if (resource) this.player.play(resource)
@@ -125,9 +166,21 @@ export class Player {
 				return
 			}
 		} catch (error) {
-			console.log(`⚠️  Failed to stream ${queue.queue[0].title}, skipping...`)
-			queue.removeFirst()
-			this.play()
+			try {
+				const songTitle = currentSong?.title || 'Unknown song'
+				console.log(`⚠️  Failed to stream ${songTitle}, skipping...`)
+				console.error('Stream error:', error)
+				queue.removeFirst()
+				this.play()
+			} catch (recoveryError) {
+				console.error('Failed to recover from stream error:', recoveryError)
+				// Try to stop the player to prevent further issues
+				try {
+					this.stop()
+				} catch (stopError) {
+					console.error('Failed to stop player during error recovery:', stopError)
+				}
+			}
 			return
 		}
 
