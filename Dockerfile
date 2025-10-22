@@ -6,7 +6,7 @@ RUN apt-get update -y \
 		ffmpeg libogg0 libopus0 opus-tools python3 python3-pip curl jq unzip \
 	&& pip3 install --no-cache-dir --break-system-packages yt-dlp
 
-RUN curl -fsSL https://deno.land/install.sh | sh
+RUN curl -fsSL https://deno.land/install.sh | sh -s -- -y
 
 RUN npm i -g node-gyp esbuild
 
