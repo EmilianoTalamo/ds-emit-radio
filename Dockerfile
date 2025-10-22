@@ -6,6 +6,8 @@ RUN apt-get update -y \
 		ffmpeg libogg0 libopus0 opus-tools python3 python3-pip curl jq \
 	&& pip3 install --no-cache-dir --break-system-packages yt-dlp
 
+RUN curl -fsSL https://deno.land/install.sh | sh
+
 RUN npm i -g node-gyp esbuild
 
 RUN apt-get autoremove
