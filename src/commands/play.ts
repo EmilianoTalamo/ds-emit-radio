@@ -92,7 +92,7 @@ const handleYoutube = async (
         title: ytinfo.basic_info.title,
         ytdetails: ytinfo.basic_info,
     }
-	next ? queue.addNext(queueItem) : queue.add(queueItem)
+	next ? queue.addNext(queueItem, interaction.user) : queue.add(queueItem, interaction.user)
 
     return ytinfo.basic_info.title
 }

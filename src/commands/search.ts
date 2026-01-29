@@ -140,7 +140,7 @@ const handleSearch = async (interaction: ChatInputCommandInteraction) => {
 		}
 	}
 	
-	queue.add(queueItem)
+	queue.add(queueItem, interaction.user)
 
 	// Start playing if bot is idle
 	if (player.status === 'idle') {

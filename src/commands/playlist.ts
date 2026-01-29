@@ -91,7 +91,7 @@ const handleYoutube = async (
 			id,
 			title: null,
 			ytdetails: undefined, // Will be populated by refreshInfo for visible items
-		})
+		}, interaction.user)
 	}
 
 	return idsArray.length
@@ -117,7 +117,7 @@ const handleSpotify = async (
 			id: null,
 			title: `${joinArtists(track.artist)} - ${track.title}`,
 			ytdetails: undefined, // Will be populated by refreshInfo
-		})
+		}, interaction.user)
 	}
 
 	return tracks.length

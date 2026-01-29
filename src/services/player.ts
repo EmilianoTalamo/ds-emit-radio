@@ -220,12 +220,38 @@ export class Player {
 }
 
 const generateNowPlayingEmbed = () => {
-	return new EmbedBuilder()
+	const currentSong = queue.queue[0]
+	
+	const embed = new EmbedBuilder()
 		.setColor(player.color)
-        .setDescription(
-            `${player.repeat ? '🔁' : '▶️'}  Now ${player.repeat ? 'repeating' : 'playing'} (${secondsToMinutesAndSeconds(queue.queue[0].ytdetails?.lengthSeconds || 0)})`,
-        )
-		.setTitle(queue.queue[0].title || 'song')
-		.setURL(`https://youtu.be/${queue.queue[0].id}`)
-        .setThumbnail(queue.queue[0].ytdetails?.thumbnails?.[0]?.url || null)
+		.setAuthor({ name: player.repeat ? 'Now repeating' : 'Now playing' })
+		.setTitle(currentSong.title || 'song')
+		.setURL(`https://youtu.be/${currentSong.id}`)
+        .setThumbnail(currentSong.ytdetails?.thumbnails?.[0]?.url || null)
+		.addFields(
+			{
+				name: 'Song duration',
+				value: secondsToMinutesAndSeconds(currentSong.ytdetails?.lengthSeconds || 0),
+				inline: true
+			},
+			{
+				name: 'Queue length',
+				value: queue.queue.length.toString(),
+				inline: true
+			}
+		)
+	
+	if (currentSong.addedBy) {
+		const footerOptions: { text: string; iconURL?: string } = {
+			text: `Added by ${currentSong.addedBy.displayName}`
+		}
+		
+		if (currentSong.addedBy.avatar) {
+			footerOptions.iconURL = `https://cdn.discordapp.com/avatars/${currentSong.addedBy.id}/${currentSong.addedBy.avatar}.png`
+		}
+		
+		embed.setFooter(footerOptions)
+	}
+	
+	return embed
 }

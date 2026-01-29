@@ -1,7 +1,7 @@
 import { QueueItem } from '@/interfaces/queue.interface.js'
 import { player, queue } from '@/main.js'
 import { getYtInfo, search } from '@/utils/youtube.js'
-import { bold, EmbedBuilder } from 'discord.js'
+import { bold, EmbedBuilder, User } from 'discord.js'
 
 import _ from 'lodash'
 
@@ -28,11 +28,27 @@ class Queue {
 		return generateQueueEmbed(msg)
 	}
 
-	add(song: QueueItem) {
+	add(song: QueueItem, user?: User) {
+		if (user) {
+			song.addedBy = {
+				id: user.id,
+				username: user.username,
+				displayName: user.displayName || user.username,
+				avatar: user.avatar
+			}
+		}
 		this.queue.push(song)
 	}
 
-	addNext(song: QueueItem) {
+	addNext(song: QueueItem, user?: User) {
+		if (user) {
+			song.addedBy = {
+				id: user.id,
+				username: user.username,
+				displayName: user.displayName || user.username,
+				avatar: user.avatar
+			}
+		}
 		this.queue.splice(1, 0, song)
 	}
 
@@ -163,6 +179,11 @@ class Queue {
 		item.id = ytEquivalent.videoDetails?.videoId || ytEquivalent.videoId
 
 		// Now get the full info for the found video
+		if (!item.id) {
+			console.log(`⚠️  No video ID found for: "${item.title}"`)
+			this.remove(item)
+			return false
+		}
 		const ytinfo = await getYtInfo(item.id)
 		if (ytinfo) {
 			item.title = item.title ? item.title : ytinfo.basic_info.title
