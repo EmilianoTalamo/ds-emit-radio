@@ -36,7 +36,7 @@ export const getYtInfo = async (
 		const cookiesFlag = cookiesArgs.length > 0 ? ` ${cookiesArgs.join(' ')}` : ''
 		
 		const { stdout } = await execAsync(
-			`yt-dlp --dump-json --no-playlist --extractor-args "youtube:player-client=default,-tv_simply"${cookiesFlag} "${url}"`,
+			`yt-dlp --dump-json --no-playlist --extractor-args "youtube:player_client=default,-android_sdkless"${cookiesFlag} "${url}"`,
 			{ timeout: 15000 } // 15 second timeout
 		)
 		
@@ -94,7 +94,7 @@ export const getAudioStream = async (id: string): Promise<Readable> => {
 		'--output', '-',
 		'--quiet',
 		'--no-playlist',
-		'--extractor-args', 'youtube:player-client=default,-tv_simply',
+		'--extractor-args', 'youtube:player_client=default,-android_sdkless',
 		'--buffer-size', '16K', // Smaller buffer to reduce memory usage
 		'--no-part', // Don't create .part files
 		'--retries', '3', // Retry failed downloads
@@ -152,7 +152,7 @@ export const getYtPlaylistIds = async (playlistId: string): Promise<string[] | f
 		const cookiesFlag = cookiesArgs.length > 0 ? ` ${cookiesArgs.join(' ')}` : ''
 		
 		const { stdout } = await execAsync(
-			`yt-dlp --flat-playlist --dump-json --no-warnings --extractor-args "youtube:player-client=default,-tv_simply"${cookiesFlag} "${url}"`,
+			`yt-dlp --flat-playlist --dump-json --no-warnings --extractor-args "youtube:player_client=default,-android_sdkless"${cookiesFlag} "${url}"`,
 			{ 
 				maxBuffer: 200 * 1024 * 1024, // 200MB buffer for large playlists
 				timeout: 30000 // 30 second timeout for playlists
@@ -204,7 +204,7 @@ export const searchYoutube = async (query: string): Promise<any> => {
 		const cookiesFlag = cookiesArgs.length > 0 ? ` ${cookiesArgs.join(' ')}` : ''
 		
 		const { stdout, stderr } = await execAsync(
-			`yt-dlp "ytsearch:${query}" --dump-json --no-playlist --max-downloads 1 --extractor-args "youtube:player-client=default,-tv_simply"${cookiesFlag}`,
+			`yt-dlp "ytsearch:${query}" --dump-json --no-playlist --max-downloads 1 --extractor-args "youtube:player_client=default,-android_sdkless"${cookiesFlag}`,
 			{ timeout: 20000 } // 20 second timeout for searches
 		)
 		
