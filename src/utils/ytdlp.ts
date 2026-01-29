@@ -33,10 +33,17 @@ export const getYtInfo = async (
 	try {
 		const url = `https://www.youtube.com/watch?v=${id}`
 		const cookiesArgs = getCookiesArgs()
-		const cookiesFlag = cookiesArgs.length > 0 ? ` ${cookiesArgs.join(' ')}` : ''
+		
+		const args = [
+			'--dump-json',
+			'--no-playlist',
+			'--extractor-args', 'youtube:player_client=default,-android_sdkless',
+			...cookiesArgs,
+			url
+		]
 		
 		const { stdout } = await execAsync(
-			`yt-dlp --dump-json --no-playlist --extractor-args "youtube:player_client=default,-android_sdkless"${cookiesFlag} "${url}"`,
+			`yt-dlp ${args.map(arg => `"${arg}"`).join(' ')}`,
 			{ timeout: 15000 } // 15 second timeout
 		)
 		
@@ -149,10 +156,18 @@ export const getYtPlaylistIds = async (playlistId: string): Promise<string[] | f
 	try {
 		const url = `https://www.youtube.com/playlist?list=${playlistId}`
 		const cookiesArgs = getCookiesArgs()
-		const cookiesFlag = cookiesArgs.length > 0 ? ` ${cookiesArgs.join(' ')}` : ''
+		
+		const args = [
+			'--flat-playlist',
+			'--dump-json',
+			'--no-warnings',
+			'--extractor-args', 'youtube:player_client=default,-android_sdkless',
+			...cookiesArgs,
+			url
+		]
 		
 		const { stdout } = await execAsync(
-			`yt-dlp --flat-playlist --dump-json --no-warnings --extractor-args "youtube:player_client=default,-android_sdkless"${cookiesFlag} "${url}"`,
+			`yt-dlp ${args.map(arg => `"${arg}"`).join(' ')}`,
 			{ 
 				maxBuffer: 200 * 1024 * 1024, // 200MB buffer for large playlists
 				timeout: 30000 // 30 second timeout for playlists
@@ -201,10 +216,18 @@ export const getYtPlaylistIds = async (playlistId: string): Promise<string[] | f
 export const searchYoutube = async (query: string): Promise<any> => {
 	try {
 		const cookiesArgs = getCookiesArgs()
-		const cookiesFlag = cookiesArgs.length > 0 ? ` ${cookiesArgs.join(' ')}` : ''
+		
+		const args = [
+			`ytsearch:${query}`,
+			'--dump-json',
+			'--no-playlist',
+			'--max-downloads', '1',
+			'--extractor-args', 'youtube:player_client=default,-android_sdkless',
+			...cookiesArgs
+		]
 		
 		const { stdout, stderr } = await execAsync(
-			`yt-dlp "ytsearch:${query}" --dump-json --no-playlist --max-downloads 1 --extractor-args "youtube:player_client=default,-android_sdkless"${cookiesFlag}`,
+			`yt-dlp ${args.map(arg => `"${arg}"`).join(' ')}`,
 			{ timeout: 20000 } // 20 second timeout for searches
 		)
 		

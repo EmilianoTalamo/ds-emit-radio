@@ -4,7 +4,7 @@ RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get update -y \
 	&& apt-get install -y -q --no-install-recommends \
 		ffmpeg libogg0 libopus0 opus-tools python3 python3-pip curl jq unzip \
-	&& pip3 install --no-cache-dir --break-system-packages yt-dlp
+	&& pip3 install --no-cache-dir --break-system-packages yt-dlp yt-dlp-ejs
 
 RUN curl -fsSL https://deno.land/install.sh | sh -s -- -y
 
