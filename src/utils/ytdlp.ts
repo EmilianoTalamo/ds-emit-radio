@@ -30,6 +30,12 @@ export type YtBasicInfo = {
 export const getYtInfo = async (
 	id: string,
 ): Promise<{ basic_info: YtBasicInfo } | false> => {
+	// Safety check for undefined or invalid IDs
+	if (!id || id === 'undefined' || id === 'null') {
+		console.log(`⚠️  Invalid video ID provided: ${id}`)
+		return false
+	}
+	
 	try {
 		const url = `https://www.youtube.com/watch?v=${id}`
 		const cookiesArgs = getCookiesArgs()

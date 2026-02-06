@@ -119,9 +119,19 @@ const handleSpotify = async (
 		return ''
 	}
 
+	// Extract video ID from the search result
+	const videoId = ytEquivalent.videoDetails?.videoId || ytEquivalent.videoId
+	
+	if (!videoId) {
+		await interaction.editReply(
+			`Couldn't find a valid YouTube video for this track. Try searching for it on YouTube and adding it directly using the YouTube URL instead.`,
+		)
+		return ''
+	}
+
 	return await handleYoutube(
 		interaction,
-		`https://youtube.com/watch?v=${ytEquivalent.videoId}`,
+		`https://youtube.com/watch?v=${videoId}`,
 		next,
 	)
 }
