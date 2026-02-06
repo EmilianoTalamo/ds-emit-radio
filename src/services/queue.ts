@@ -115,6 +115,12 @@ class Queue {
 				continue
 			}
 			
+			// Skip stream items - they don't need YouTube info processing
+			if (item.command === 'stream') {
+				i++
+				continue
+			}
+			
 			let shouldIncrement = true
 			
 			if (!item.id && item.title) {

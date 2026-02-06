@@ -7,6 +7,7 @@ import {
 } from '@discordjs/voice'
 import { ColorResolvable, EmbedBuilder } from 'discord.js'
 import { getAudioStream } from '../utils/youtube.js'
+import { getStreamAudio } from '../utils/stream.js'
 import { send, sendEmbed } from '@/handlers/channel.js'
 import { idlePresence, musicPresence } from '@/handlers/activity.js'
 import { secondsToMinutesAndSeconds } from '@/utils/format.js'
@@ -132,13 +133,24 @@ export class Player {
 
 
 		try {
-			// Load the audio resource with volume control and stream options for long videos
-			const stream = await getAudioStream(currentSong.id)
+			// Check if this is a stream or a YouTube video based on the command
+			const isStream = currentSong.command === 'stream'
+			let stream
+			
+			if (isStream) {
+				// Handle stream URLs (radio streams, MP3 files, etc.)
+				stream = await getStreamAudio(currentSong.id!)
+			} else {
+				// Handle YouTube videos
+				stream = await getAudioStream(currentSong.id!)
+			}
+			
 			const resource = createAudioResource(stream, {
 				inlineVolume: true,
 				metadata: {
 					title: currentSong.title,
-					id: currentSong.id
+					id: currentSong.id,
+					isStream: isStream
 				}
 			})
 
@@ -221,25 +233,40 @@ export class Player {
 
 const generateNowPlayingEmbed = () => {
 	const currentSong = queue.queue[0]
+	const isStream = currentSong.command === 'stream'
+	
+	// Truncate title if it's too long to prevent embed errors
+	let title = currentSong.title || 'song'
+	if (title.length > 140) {
+		title = title.substring(0, 137) + '...'
+	}
 	
 	const embed = new EmbedBuilder()
 		.setColor(player.color)
 		.setAuthor({ name: player.repeat ? 'Now repeating' : 'Now playing' })
-		.setTitle(currentSong.title || 'song')
-		.setURL(`https://youtu.be/${currentSong.id}`)
-        .setThumbnail(currentSong.ytdetails?.thumbnails?.[0]?.url || null)
-		.addFields(
-			{
-				name: 'Song duration',
-				value: secondsToMinutesAndSeconds(currentSong.ytdetails?.lengthSeconds || 0),
-				inline: true
-			},
-			{
-				name: 'Queue length',
-				value: queue.queue.length.toString(),
-				inline: true
-			}
-		)
+		.setTitle(title)
+	
+	// Set URL and thumbnail based on whether it's a stream or YouTube video
+	if (isStream) {
+		embed.setURL(currentSong.id || '')
+	} else {
+		embed.setURL(`https://youtu.be/${currentSong.id}`)
+		embed.setThumbnail(currentSong.ytdetails?.thumbnails?.[0]?.url || null)
+	}
+	
+	if (!isStream) {
+		embed.addFields({
+			name: 'Song duration',
+			value: secondsToMinutesAndSeconds(currentSong.ytdetails?.lengthSeconds || 0),
+			inline: true
+		})
+	}
+	
+	embed.addFields({
+		name: 'Queue length',
+		value: queue.queue.length.toString(),
+		inline: true
+	})
 	
 	// Add playlist field if song was added via playlist and playlist info is available
 	if (currentSong.command === 'playlist' && currentSong.playlist) {
