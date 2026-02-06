@@ -150,3 +150,30 @@ export const getSongInfo = async (songUrl: string) => {
 
 	return songData || false
 }
+
+export const getPlaylistInfo = async (playlistUrl: string): Promise<{ title: string } | false> => {
+	try {
+		const playlistInfo = getPlaylistId(playlistUrl)
+
+		if (!playlistInfo.id || playlistInfo.type === 'invalid') return false
+
+		if (playlistInfo.type === 'playlist') {
+			const playlist = await spotify.sdk.playlists.getPlaylist(playlistInfo.id)
+			return {
+				title: playlist.name || 'Unknown Playlist'
+			}
+		}
+
+		if (playlistInfo.type === 'album') {
+			const album = await spotify.sdk.albums.get(playlistInfo.id)
+			return {
+				title: album.name || 'Unknown Album'
+			}
+		}
+
+		return false
+	} catch (error: any) {
+		console.log(`⚠️  Failed to get Spotify playlist info:`, error.message)
+		return false
+	}
+}

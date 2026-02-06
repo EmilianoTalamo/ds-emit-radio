@@ -150,6 +150,49 @@ export const getAudioStream = async (id: string): Promise<Readable> => {
 }
 
 /**
+ * Get playlist information using yt-dlp
+ */
+export const getYtPlaylistInfo = async (playlistId: string): Promise<{ title: string } | false> => {
+	try {
+		const url = `https://www.youtube.com/playlist?list=${playlistId}`
+		const cookiesArgs = getCookiesArgs()
+		
+		const args = [
+			'--dump-json',
+			'--no-warnings',
+			'--playlist-end', '1', // Only get first item to extract playlist info
+			'--extractor-args', 'youtube:player_client=default,-android_sdkless',
+			...cookiesArgs,
+			url
+		]
+		
+		const { stdout } = await execAsync(
+			`yt-dlp ${args.map(arg => `"${arg}"`).join(' ')}`,
+			{ 
+				timeout: 15000 // 15 second timeout
+			}
+		)
+		
+		const lines = stdout.trim().split('\n').filter(line => line.trim())
+		if (lines.length > 0) {
+			try {
+				const info = JSON.parse(lines[0])
+				return {
+					title: info.playlist_title || info.uploader || 'Unknown Playlist'
+				}
+			} catch (e) {
+				return false
+			}
+		}
+		
+		return false
+	} catch (error: any) {
+		console.log(`⚠️  Failed to get playlist info for ${playlistId}:`, error.message)
+		return false
+	}
+}
+
+/**
  * Get playlist video IDs using yt-dlp
  */
 export const getYtPlaylistIds = async (playlistId: string): Promise<string[] | false> => {

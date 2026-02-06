@@ -241,9 +241,26 @@ const generateNowPlayingEmbed = () => {
 			}
 		)
 	
+	// Add playlist field if song was added via playlist and playlist info is available
+	if (currentSong.command === 'playlist' && currentSong.playlist) {
+		embed.addFields({
+			name: 'Playlist',
+			value: `[${currentSong.playlist.name}](${currentSong.playlist.url})`,
+			inline: false
+		})
+	}
+	
+	embed
+	
 	if (currentSong.addedBy) {
+		let footerText = `Added by ${currentSong.addedBy.displayName}`
+		
+		if (currentSong.command) {
+			footerText += ` - via /${currentSong.command}`
+		}
+		
 		const footerOptions: { text: string; iconURL?: string } = {
-			text: `Added by ${currentSong.addedBy.displayName}`
+			text: footerText
 		}
 		
 		if (currentSong.addedBy.avatar) {

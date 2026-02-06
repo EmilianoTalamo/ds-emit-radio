@@ -11,4 +11,9 @@ export type QueueItem = {
 		displayName: string
 		avatar?: string | null
 	}
+	command?: string
+	playlist?: {
+		name: string
+		url: string
+	}
 }

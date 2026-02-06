@@ -2,8 +2,8 @@ import { isBotAlone, isUserWithBot } from '@/handlers/channel.js'
 import { connection, player, queue } from '@/main.js'
 import { joinArtists } from '@/utils/format.js'
 import { identifyService } from '@/utils/services.js'
-import { getTracksFromPlaylist } from '@/utils/spotify.js'
-import { getUrlInfo, getYtPlaylistIds } from '@/utils/youtube.js'
+import { getTracksFromPlaylist, getPlaylistInfo } from '@/utils/spotify.js'
+import { getUrlInfo, getYtPlaylistIds, getYtPlaylistInfo } from '@/utils/youtube.js'
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 
 export default {
@@ -83,6 +83,20 @@ const handleYoutube = async (
 		return 0
 	}
 
+	// Try to get playlist info (don't block if it fails)
+	let playlistInfo: { name: string; url: string } | undefined
+	try {
+		const ytPlaylistInfo = await getYtPlaylistInfo(urlInfo.playlistId)
+		if (ytPlaylistInfo) {
+			playlistInfo = {
+				name: ytPlaylistInfo.title,
+				url: url
+			}
+		}
+	} catch (error) {
+		console.log('⚠️  Failed to fetch YouTube playlist info, continuing without it')
+	}
+
 	interaction.editReply('🫡 Your playlist will be added shortly...')
 
 	// Add all video IDs to queue - refreshInfo will validate the first 5 as needed
@@ -91,7 +105,7 @@ const handleYoutube = async (
 			id,
 			title: null,
 			ytdetails: undefined, // Will be populated by refreshInfo for visible items
-		}, interaction.user)
+		}, interaction.user, 'playlist', playlistInfo)
 	}
 
 	return idsArray.length
@@ -110,6 +124,20 @@ const handleSpotify = async (
 		return 0
 	}
 
+	// Try to get playlist info (don't block if it fails)
+	let playlistInfo: { name: string; url: string } | undefined
+	try {
+		const spotifyPlaylistInfo = await getPlaylistInfo(url)
+		if (spotifyPlaylistInfo) {
+			playlistInfo = {
+				name: spotifyPlaylistInfo.title,
+				url: url
+			}
+		}
+	} catch (error) {
+		console.log('⚠️  Failed to fetch Spotify playlist info, continuing without it')
+	}
+
 	interaction.editReply('🫡 Your playlist will be added shortly...')
 
 	for (const track of tracks) {
@@ -117,7 +145,7 @@ const handleSpotify = async (
 			id: null,
 			title: `${joinArtists(track.artist)} - ${track.title}`,
 			ytdetails: undefined, // Will be populated by refreshInfo
-		}, interaction.user)
+		}, interaction.user, 'playlist', playlistInfo)
 	}
 
 	return tracks.length

@@ -28,7 +28,7 @@ class Queue {
 		return generateQueueEmbed(msg)
 	}
 
-	add(song: QueueItem, user?: User) {
+	add(song: QueueItem, user?: User, command?: string, playlist?: { name: string; url: string }) {
 		if (user) {
 			song.addedBy = {
 				id: user.id,
@@ -37,10 +37,16 @@ class Queue {
 				avatar: user.avatar
 			}
 		}
+		if (command) {
+			song.command = command
+		}
+		if (playlist) {
+			song.playlist = playlist
+		}
 		this.queue.push(song)
 	}
 
-	addNext(song: QueueItem, user?: User) {
+	addNext(song: QueueItem, user?: User, command?: string, playlist?: { name: string; url: string }) {
 		if (user) {
 			song.addedBy = {
 				id: user.id,
@@ -48,6 +54,12 @@ class Queue {
 				displayName: user.displayName || user.username,
 				avatar: user.avatar
 			}
+		}
+		if (command) {
+			song.command = command
+		}
+		if (playlist) {
+			song.playlist = playlist
 		}
 		this.queue.splice(1, 0, song)
 	}

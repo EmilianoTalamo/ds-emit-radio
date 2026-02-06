@@ -1,6 +1,6 @@
 import queryString from 'query-string'
 import { URLPattern } from 'urlpattern-polyfill'
-import { getYtInfo as getYtInfoYtDlp, getAudioStream as getAudioStreamYtDlp, getYtPlaylistIds as getYtPlaylistIdsYtDlp, searchYoutube, YtBasicInfo } from './ytdlp.js'
+import { getYtInfo as getYtInfoYtDlp, getAudioStream as getAudioStreamYtDlp, getYtPlaylistIds as getYtPlaylistIdsYtDlp, getYtPlaylistInfo as getYtPlaylistInfoYtDlp, searchYoutube, YtBasicInfo } from './ytdlp.js'
 
 // Re-export types
 export type { YtBasicInfo }
@@ -78,6 +78,8 @@ export const getUrlInfo = (url: string): GetUrlInfoResponse => {
 export const getYtInfo = getYtInfoYtDlp
 
 export const getYtPlaylistIds = getYtPlaylistIdsYtDlp
+
+export const getYtPlaylistInfo = getYtPlaylistInfoYtDlp
 
 export const getAudioStream = getAudioStreamYtDlp
 
