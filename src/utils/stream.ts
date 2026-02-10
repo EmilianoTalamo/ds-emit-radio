@@ -52,7 +52,10 @@ export const getStreamAudio = async (url: string): Promise<Readable> => {
 		'-reconnect', '1',
 		'-reconnect_streamed', '1',
 		'-reconnect_delay_max', '5',
-		'-loglevel', 'warning',
+		'-reconnect_at_eof', '1',
+		'-multiple_requests', '1',
+		'-user_agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+		'-loglevel', 'error', // Reduce log verbosity
 		'-'
 	], {
 		stdio: ['ignore', 'pipe', 'pipe']
@@ -62,24 +65,40 @@ export const getStreamAudio = async (url: string): Promise<Readable> => {
 		throw new Error('Failed to create stream audio process')
 	}
 
-	// Handle errors
+	// Handle errors more gracefully
 	ffmpeg.stderr?.on('data', (data) => {
 		const errorMessage = data.toString().trim()
-		// Only log significant errors, filter out common ffmpeg warnings
+		// Filter out common harmless errors that occur during normal streaming
 		if (errorMessage && 
 			!errorMessage.includes('deprecated') && 
-			!errorMessage.includes('Application provided invalid')) {
+			!errorMessage.includes('Application provided invalid') &&
+			!errorMessage.includes('Broken pipe') &&
+			!errorMessage.includes('av_interleaved_write_frame') &&
+			!errorMessage.includes('Error writing trailer') &&
+			!errorMessage.includes('Error closing file') &&
+			!errorMessage.includes('Last message repeated')) {
 			console.error('ffmpeg stderr:', errorMessage)
 		}
 	})
 
 	ffmpeg.on('error', (error) => {
-		console.error('ffmpeg process error:', error)
+		// Only log non-EPIPE errors as they're the only ones that matter
+		if (!error.message.includes('EPIPE') && !error.message.includes('Broken pipe')) {
+			console.error('ffmpeg process error:', error)
+		}
 	})
 
 	ffmpeg.on('exit', (code, signal) => {
-		if (code !== 0 && code !== null && signal !== 'SIGTERM') {
+		// Don't log broken pipe exits as errors - they're normal when streams end
+		if (code !== 0 && code !== null && signal !== 'SIGTERM' && code !== 1) {
 			console.log(`⚠️  ffmpeg process exited with code ${code} for stream ${url}`)
+		}
+	})
+
+	// Handle stdout errors to prevent crashes
+	ffmpeg.stdout.on('error', (error) => {
+		if (!error.message.includes('EPIPE') && !error.message.includes('Broken pipe')) {
+			console.error('ffmpeg stdout error:', error)
 		}
 	})
 
