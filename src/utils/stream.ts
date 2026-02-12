@@ -17,6 +17,38 @@ export const isValidStreamUrl = (url: string): boolean => {
 }
 
 /**
+ * Generate a readable title from a stream URL
+ */
+const generateTitleFromUrl = (url: string): string => {
+	try {
+		const urlObj = new URL(url)
+		
+		// Get the pathname without leading slash
+		let path = urlObj.pathname.replace(/^\/+/, '')
+		
+		// Remove file extension if present
+		path = path.replace(/\.[^.]+$/, '')
+		
+		// If no meaningful path, use hostname
+		if (!path || path === '') {
+			return urlObj.hostname
+		}
+		
+		// Replace slashes and underscores with spaces, capitalize words
+		const title = path
+			.replace(/[/_-]/g, ' ')
+			.split(' ')
+			.map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+			.join(' ')
+		
+		return title || urlObj.hostname
+	} catch (error) {
+		// Fallback: return trimmed URL
+		return url.length > 100 ? url.substring(0, 97) + '...' : url
+	}
+}
+
+/**
  * Get stream information (basic validation)
  */
 export const getStreamInfo = async (url: string): Promise<{ title: string; url: string } | false> => {
@@ -25,10 +57,11 @@ export const getStreamInfo = async (url: string): Promise<{ title: string; url: 
 	}
 	
 	try {
-		// Include the URL in the title for identification
-		// In the future, this could be enhanced to fetch actual stream metadata
+		// Generate a readable title from the URL
+		const title = generateTitleFromUrl(url)
+		
 		return {
-			title: `Radio stream (${url})`,
+			title: title,
 			url: url
 		}
 	} catch (error) {

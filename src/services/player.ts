@@ -226,9 +226,7 @@ export class Player {
 			idlePresence()
 		} else if (status === 'playing') {
 			this.status = 'playing'
-			const currentSong = queue?.queue?.[0]
-			const presenceText = currentSong?.command === 'stream' ? 'Radio stream' : (currentSong?.title || 'music')
-			musicPresence(presenceText)
+			musicPresence(queue?.queue?.[0]?.title || 'music')
 		}
 	}
 }
