@@ -1,5 +1,6 @@
 import queryString from 'query-string'
 import { URLPattern } from 'urlpattern-polyfill'
+import YTMusic from 'ytmusic-api'
 import { getYtInfo as getYtInfoYtDlp, getAudioStream as getAudioStreamYtDlp, getYtPlaylistIds as getYtPlaylistIdsYtDlp, getYtPlaylistInfo as getYtPlaylistInfoYtDlp, searchYoutube, YtBasicInfo } from './ytdlp.js'
 
 // Re-export types
@@ -85,4 +86,65 @@ export const getAudioStream = getAudioStreamYtDlp
 
 export const search = async (query: string) => {
 	return await searchYoutube(query)
+}
+
+export type YtMusicArtistResult = {
+	artistName: string
+	artistUrl: string
+	songs: Array<{ id: string; title: string | null }>
+}
+
+let ytmusic: YTMusic | null = null
+
+const getYTMusic = async (): Promise<YTMusic> => {
+	if (!ytmusic) {
+		ytmusic = new YTMusic()
+		await ytmusic.initialize()
+	}
+	return ytmusic
+}
+
+export const searchArtist = async (
+	query: string,
+): Promise<YtMusicArtistResult | null> => {
+	try {
+		const yt = await getYTMusic()
+
+		const artists = await yt.searchArtists(query)
+		if (!artists.length) return null
+
+		const artist = artists[0]
+
+		let topSongs = await yt.getArtistSongs(artist.artistId)
+		if (!topSongs.length) {
+			const artistFull = await yt.getArtist(artist.artistId)
+			topSongs = artistFull.topSongs
+		}
+
+		if (!topSongs.length) return null
+
+		const songs = topSongs.slice(0, 10).map((song) => ({
+			id: song.videoId,
+			title: song.name,
+		}))
+
+		return {
+			artistName: artist.name,
+			artistUrl: `https://music.youtube.com/channel/${artist.artistId}`,
+			songs,
+		}
+	} catch (error: any) {
+		if (
+			error.message?.includes('Connect Timeout Error') ||
+			error.code === 'ETIMEDOUT' ||
+			error.code === 'ECONNRESET' ||
+			error.code === 'ENOTFOUND'
+		) {
+			console.log(`⚠️  Network error searching for artist: ${query}`)
+			return null
+		}
+
+		console.error('Error searching YouTube Music for artist:', error.message)
+		return null
+	}
 }

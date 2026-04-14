@@ -268,10 +268,10 @@ const generateNowPlayingEmbed = () => {
 		inline: true
 	})
 	
-	// Add playlist field if song was added via playlist and playlist info is available
-	if (currentSong.command === 'playlist' && currentSong.playlist) {
+	if ((currentSong.command === 'playlist' || currentSong.command === 'artist') && currentSong.playlist) {
+		const isArtist = currentSong.command === 'artist'
 		embed.addFields({
-			name: 'Playlist',
+			name: isArtist ? 'Artist' : 'Playlist',
 			value: `[${currentSong.playlist.name}](${currentSong.playlist.url})`,
 			inline: false
 		})

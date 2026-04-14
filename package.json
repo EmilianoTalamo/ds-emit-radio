@@ -50,6 +50,7 @@
     "query-string": "9.3.1",
     "tsx": "4.20.5",
     "typescript": "5.9.2",
-    "urlpattern-polyfill": "10.1.0"
+    "urlpattern-polyfill": "10.1.0",
+    "ytmusic-api": "5.3.1"
   }
 }
