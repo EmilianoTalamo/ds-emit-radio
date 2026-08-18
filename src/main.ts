@@ -74,7 +74,7 @@ const main = async () => {
 	// Check if yt-dlp is installed
 	const ytDlpInstalled = await checkYtDlpInstalled()
 	if (!ytDlpInstalled) {
-		console.error('❌ yt-dlp is not installed. Please install it with: pip3 install yt-dlp')
+		console.error('❌ yt-dlp is not installed. Please install it with: pip3 install -U --pre "yt-dlp[default]"')
 		process.exit(1)
 	}
 	console.info('✅ yt-dlp is installed and ready')
